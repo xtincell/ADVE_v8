@@ -118,8 +118,8 @@
     {
       "id": "S6.console",
       "scope": "§13.6 Console : comptes/rôles/MFA, portefeuille marques, argent (file manuelle, factures, commissions, litiges, grille, relevés MCP), vault credentials, config, audit",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "Console 7 rubriques : vue d'ensemble (stats réelles), portefeuille+détail marque (édition piliers via ?marque=, même point d'écriture — E2E), argent (file manuelle E2E), comptes+rôles audités, vault chiffré CRUD (E2E cycle set/delete), config grille+settings (E2E), audit filtrable. Litiges/commissions/relevés MCP arrivent avec S7/S10 (tables prêtes, requêtes vides honnêtes)."
     },
     {
       "id": "S7.guild",

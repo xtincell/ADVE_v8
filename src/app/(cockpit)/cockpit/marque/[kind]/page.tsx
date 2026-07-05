@@ -39,12 +39,21 @@ function displayValue(state: FieldState | undefined): string {
   return Array.isArray(state.value) ? state.value.join("\n") : state.value;
 }
 
-export default async function PillarPage({ params }: { params: Promise<{ kind: string }> }) {
+export default async function PillarPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ kind: string }>;
+  searchParams: Promise<{ marque?: string }>;
+}) {
   const { kind: slug } = await params;
+  const { marque } = await searchParams;
   const kind = KIND_BY_SLUG[slug];
   if (!kind) notFound();
   const user = await requireUser(`/cockpit/marque/${slug}`);
-  const data = await getPillarWithHistory(user, kind);
+  // `marque` permet au staff (Console) d'éditer n'importe quelle marque du tenant —
+  // le contrôle d'accès reste dans getOwnedBrand.
+  const data = await getPillarWithHistory(user, kind, marque);
   if (!data) notFound();
   const { brand, pillar, versions } = data;
   const def = pillarDef(kind);

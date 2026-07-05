@@ -11,7 +11,7 @@ import type { SessionUser } from "@/server/auth/guards";
 export const RECURRING_TIERS: PlanTier[] = ["COCKPIT_MONTHLY", "RETAINER_BASE", "RETAINER_PRO", "RETAINER_ENTERPRISE"];
 
 export type GateResult =
-  | { allowed: true; via: "god_mode" | "subscription" | "one_shot" }
+  | { allowed: true; via: "god_mode" | "staff" | "subscription" | "one_shot" }
   | {
       allowed: false;
       code: "TIER_GATE_DENIED";
@@ -27,6 +27,8 @@ export async function checkSubscriptionGate(
   requiredTiers: PlanTier[] = RECURRING_TIERS,
 ): Promise<GateResult> {
   if (user.godMode) return { allowed: true, via: "god_mode" };
+  // Le staff opère pour ses clients : pas de gate interne (la Console n'est jamais vendue).
+  if (user.roles.includes("ADMIN") || user.roles.includes("OPERATOR")) return { allowed: true, via: "staff" };
   const sub = await db.subscription.findFirst({
     where: {
       userId: user.id,
@@ -58,6 +60,7 @@ export async function checkOneShotGate(
   scope: { brandId?: string; intakeSessionId?: string },
 ): Promise<GateResult> {
   if (user?.godMode) return { allowed: true, via: "god_mode" };
+  if (user && (user.roles.includes("ADMIN") || user.roles.includes("OPERATOR"))) return { allowed: true, via: "staff" };
   const paid = await db.payment.findFirst({
     where: {
       tier,

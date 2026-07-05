@@ -40,7 +40,11 @@ jobs:
       - run: npm run db:migrate
       - run: npm run db:seed
       - run: npm run build
-      - name: E2E (parcours d'argent)
+      - name: Préparer l'artefact standalone (statiques + public)
+        run: |
+          cp -r .next/static .next/standalone/.next/static
+          cp -r public .next/standalone/public
+      - name: E2E (parcours d'argent, servis par le standalone)
         run: |
           npx playwright install --with-deps chromium
           npm run e2e

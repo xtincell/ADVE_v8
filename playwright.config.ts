@@ -10,6 +10,9 @@ export default defineConfig({
   workers: 1,
   reporter: process.env.CI ? "github" : "list",
   timeout: 60_000,
+  // Le serveur de dev compile les routes à la volée (première visite lente) —
+  // l'assertion par défaut absorbe cette latence ; la CI sert un build précompilé.
+  expect: { timeout: 15_000 },
   use: {
     baseURL: process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000",
     trace: "retain-on-failure",
@@ -19,7 +22,8 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"] }, grep: /@mobile/ },
   ],
   webServer: {
-    command: process.env.CI ? "npm run start" : "npm run dev",
+    // CI : sert l'artefact standalone réel (output: standalone) — valide l'artefact au passage.
+    command: process.env.CI ? "node .next/standalone/server.js" : "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
