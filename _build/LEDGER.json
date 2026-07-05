@@ -52,14 +52,14 @@
     {
       "id": "S2.legal",
       "scope": "§13.2 Pages légales FR : CGU, CGV, SLA, DPA, mentions, confidentialité, trust-center, statut",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "8 pages sous /legal + /statut dynamique (ping DB réel) ; faits société en [À COMPLÉTER] ; smoke 200"
     },
     {
       "id": "S2.pricing",
       "scope": "§13.2 /pricing + /tarifs dérivés de la grille DB, FCFA d'abord",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "/tarifs 3 zones depuis PriceRule (FCFA d'abord, EUR diaspora vérifié) + alias /pricing 307"
     },
     {
       "id": "S3.adve",
@@ -82,14 +82,14 @@
     {
       "id": "S4.oracle",
       "scope": "§13.4 Oracle 21 sections déterministes + 22–35 LLM optionnel fallback honnête + statuts par section + régénération unitaire",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "35 sections composées (21 CORE det. + 22–35 fallback honnête llmEligible) ; statuts/section + régénération unitaire ; 22 tests unitaires mappers ; E2E vert ; staleness auto via amendPillar"
     },
     {
       "id": "S4.pdf",
       "scope": "§13.4 Pile PDF unique (PDFKit, zéro Chromium) : Oracle + rapport intake, snapshot horodaté + hash",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "PDFKit unique, OTF embarquées, hash+horodatage en couverture+pieds ; /api/oracle/[id]/pdf vérifié E2E (%PDF-, >20Ko) ; rapport intake PDF branché en S5 (paiement)"
     },
     {
       "id": "S5.stripe",

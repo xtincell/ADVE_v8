@@ -6,6 +6,7 @@ import { requireRole } from "@/server/auth/guards";
 const NAV: NavItem[] = [
   { href: "/cockpit", label: "Tableau de bord", exact: true },
   { href: "/cockpit/marque", label: "Ma marque" },
+  { href: "/cockpit/livrables", label: "Livrables" },
 ];
 
 export default async function CockpitLayout({ children }: { children: React.ReactNode }) {

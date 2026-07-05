@@ -52,6 +52,28 @@ test.describe("Méthode ADVE/RTIS", () => {
       await validateBtn.first().click();
       await expect(page.getByText("Validé").first()).toBeVisible();
     }
+
+    // ── Génération de l'Oracle (35 sections) depuis le socle à jour
+    await page.goto("/cockpit/livrables");
+    await page.getByRole("button", { name: /Générer l'Oracle/ }).click();
+    await expect(page).toHaveURL(/\/cockpit\/livrables\/oracle\/[a-z0-9]+$/, { timeout: 30_000 });
+    await expect(page.getByRole("heading", { name: /Oracle v\d+ — Nyama Café/ })).toBeVisible();
+    // Les 35 sections sont là, composées
+    await expect(page.getByRole("heading", { name: "Executive Summary" })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Signaux faibles sectoriels" })).toBeVisible();
+    await expect(page.getByText("Complète").first()).toBeVisible();
+    // Le contenu cite le déclaré (promesse de la marque démo)
+    await expect(page.getByText(/Le meilleur café que tu aies bu/).first()).toBeVisible();
+
+    // ── Export PDF : vrai fichier PDF, non vide
+    const url = page.url();
+    const reportId = url.split("/").pop()!;
+    const pdfResponse = await page.request.get(`/api/oracle/${reportId}/pdf`);
+    expect(pdfResponse.status()).toBe(200);
+    expect(pdfResponse.headers()["content-type"]).toContain("application/pdf");
+    const body = await pdfResponse.body();
+    expect(body.length).toBeGreaterThan(20_000);
+    expect(body.subarray(0, 5).toString()).toBe("%PDF-");
   });
 
   test("un pilier dérivé refuse l'édition côté serveur", async ({ page }) => {
