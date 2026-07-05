@@ -22,3 +22,5 @@ Une ligne par décision. Format : `AAAA-MM-JJ — décision`.
 - 2026-07-05 — Mur public Guilde + fiches mission livrés en avance (S7) : les liens de navigation existaient et les données seedées les rendent réels ; dépôt/inscriptions/candidatures restent en S7.
 - 2026-07-05 — Shells Console/Creator/Agency créés : les rôles seedés atterrissaient sur des 404 post-login. Console protégée par MFA TOTP effectif dès maintenant (enrôlement /mfa autonome + refresh de session unstable_update).
 - 2026-07-05 — /realisations : uniquement des marques réellement pilotées dans l'outil (score + progression depuis 1er snapshot) — pas de mur de logos inventé.
+- 2026-07-05 — S3 : Ma marque livré (édition champ par champ + validation INFERRED→OFFICIAL + versions + sources CRUD + RTIS refresh). Cockpit mono-marque en v2.0 (première marque non-shell du founder) — le multi-marques founder attendra un besoin réel ; le portefeuille opérateur (Console S6) couvre le multi.
+- 2026-07-05 — Les modes d'amendement assistés LLM (reformulation/réécriture avec preview) arriveront avec la gateway LLM (tranche X.llm) — le manual-first est complet dès maintenant, mêmes endpoints.

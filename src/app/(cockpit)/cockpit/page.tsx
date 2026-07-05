@@ -66,7 +66,10 @@ export default async function CockpitDashboard() {
       {staleCount > 0 && (
         <div className="rounded-(--radius-md) border border-gold bg-gold-soft px-4 py-3 text-sm">
           <strong>{staleCount} pilier{staleCount > 1 ? "s" : ""} stratégique{staleCount > 1 ? "s" : ""} périmé{staleCount > 1 ? "s" : ""}</strong>{" "}
-          — votre socle a été amendé depuis le dernier recalcul. Le refresh arrive dans « Ma marque ».
+          — votre socle a été amendé depuis le dernier recalcul.{" "}
+          <Link href="/cockpit/marque" className="font-medium underline">
+            Recalculer dans Ma marque →
+          </Link>
         </div>
       )}
 
