@@ -16,6 +16,11 @@ export interface FieldState {
 
 export type PillarFields = Record<string, FieldState>;
 
+/** Lecture typée de la colonne JSON `Pillar.fields` (Prisma JsonValue). */
+export function asPillarFields(json: unknown): PillarFields {
+  return (json ?? {}) as PillarFields;
+}
+
 export interface FieldDef {
   key: string;
   label: string;

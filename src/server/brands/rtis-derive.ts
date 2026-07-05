@@ -18,12 +18,6 @@ export interface RtisExtras {
 
 type Derived = Record<string, FieldValue>;
 
-function val(adve: AdveSnapshot, kind: keyof AdveSnapshot, key: string): string {
-  const state = adve[kind]?.[key];
-  if (!state) return "";
-  return Array.isArray(state.value) ? state.value.join(", ") : state.value;
-}
-
 function completeness(adve: AdveSnapshot, kind: keyof AdveSnapshot, key: string): number {
   const state = adve[kind]?.[key];
   return state ? structuralCompleteness(state.value) : 0;

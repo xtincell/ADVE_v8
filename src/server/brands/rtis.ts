@@ -13,7 +13,7 @@ async function loadAdveSnapshot(brandId: string): Promise<AdveSnapshot> {
     where: { brandId, kind: { in: ["AUTHENTICITE", "DISTINCTION", "VALEUR", "ENGAGEMENT"] } },
   });
   const snapshot: AdveSnapshot = {};
-  for (const p of pillars) snapshot[p.kind as keyof AdveSnapshot] = p.fields as PillarFields;
+  for (const p of pillars) snapshot[p.kind as keyof AdveSnapshot] = p.fields as unknown as PillarFields;
   return snapshot;
 }
 
@@ -50,7 +50,7 @@ export async function refreshRtisPillar(
     const upstreamPillars = await db.pillar.findMany({
       where: { brandId, kind: { in: RTIS_KINDS.slice(0, idx) as PillarKind[] } },
     });
-    for (const p of upstreamPillars) upstream[p.kind] = p.fields as PillarFields;
+    for (const p of upstreamPillars) upstream[p.kind] = p.fields as unknown as PillarFields;
   }
 
   const fields = deriveRtis(kind, adve, extras, upstream);

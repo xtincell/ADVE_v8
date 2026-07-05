@@ -1,7 +1,7 @@
 import type { AmendMode, Brand, Certainty, Pillar, PillarKind, Prisma } from "@prisma/client";
 import { db } from "@/server/db";
 import { audit } from "@/server/audit";
-import { fieldDef, isDerived, pillarDef, type FieldValue, type PillarFields } from "./pillar-config";
+import { asPillarFields, fieldDef, isDerived, pillarDef, type FieldValue, type PillarFields } from "./pillar-config";
 import {
   adveCompletenessRatio,
   compositeScore,
@@ -87,7 +87,7 @@ export async function amendPillar(input: AmendInput): Promise<AmendResult> {
   return db.$transaction(async (tx) => {
     const brand = await tx.brand.findUniqueOrThrow({ where: { id: brandId } });
     const existing = await tx.pillar.findUnique({ where: { brandId_kind: { brandId, kind } } });
-    const beforeFields = (existing?.fields ?? {}) as PillarFields;
+    const beforeFields = (existing?.fields ?? {}) as unknown as PillarFields;
     const merged: PillarFields = { ...beforeFields, ...validated };
     const newVersion = (existing?.version ?? 0) + 1;
 
@@ -96,13 +96,13 @@ export async function amendPillar(input: AmendInput): Promise<AmendResult> {
       create: {
         brandId,
         kind,
-        fields: merged as Prisma.InputJsonValue,
+        fields: merged as unknown as Prisma.InputJsonValue,
         version: newVersion,
         stale: false,
         refreshedAt: isDerived(kind) ? new Date() : null,
       },
       update: {
-        fields: merged as Prisma.InputJsonValue,
+        fields: merged as unknown as Prisma.InputJsonValue,
         version: newVersion,
         stale: false,
         staleAt: null,
@@ -143,7 +143,7 @@ export async function amendPillar(input: AmendInput): Promise<AmendResult> {
     });
     const pillarScores = {} as Record<PillarKind, number>;
     for (const p of allPillars) {
-      if (!isDerived(p.kind)) pillarScores[p.kind] = scorePillar(p.kind, p.fields as PillarFields);
+      if (!isDerived(p.kind)) pillarScores[p.kind] = scorePillar(p.kind, asPillarFields(p.fields));
     }
     const ratio = adveCompletenessRatio(pillarScores);
     for (const p of allPillars) {
@@ -161,7 +161,7 @@ export async function amendPillar(input: AmendInput): Promise<AmendResult> {
       data: {
         pillarId: pillar.id,
         version: newVersion,
-        fields: merged as Prisma.InputJsonValue,
+        fields: merged as unknown as Prisma.InputJsonValue,
         score: effectiveScore,
         mode,
         authorId: actor?.id ?? null,

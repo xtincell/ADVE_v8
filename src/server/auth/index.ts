@@ -1,4 +1,4 @@
-import NextAuth from "next-auth";
+import NextAuth, { CredentialsSignin } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
@@ -13,11 +13,14 @@ import { decrypt } from "@/server/vault/crypto";
 // (uniquement si GOOGLE_CLIENT_ID/SECRET présents), sessions JWT, god-mode par env,
 // MFA TOTP pour ADMIN (vérifié au login dès qu'enrôlé).
 
-export class MfaRequiredError extends Error {
-  code = "MFA_REQUIRED";
-  constructor() {
-    super("Code de vérification requis.");
-  }
+/** Le compte exige un code TOTP (MFA enrôlé) — le formulaire de connexion révèle le champ code. */
+export class MfaRequiredError extends CredentialsSignin {
+  code = "mfa_required";
+}
+
+/** Code TOTP fourni mais invalide. */
+export class MfaInvalidError extends CredentialsSignin {
+  code = "mfa_invalid";
 }
 
 function googleEnabled(): boolean {
@@ -53,7 +56,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (user.mfaEnabled && user.mfaSecret) {
           if (!totp) throw new MfaRequiredError();
           const valid = authenticator.verify({ token: totp, secret: decrypt(user.mfaSecret) });
-          if (!valid) throw new MfaRequiredError();
+          if (!valid) throw new MfaInvalidError();
         }
 
         return {

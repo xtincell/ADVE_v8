@@ -10,3 +10,9 @@ Une ligne par décision. Format : `AAAA-MM-JJ — décision`.
 - 2026-07-05 — Scoring : composite /200 = somme des 8 piliers scorés /25 chacun ; barème par champ = complétude structurelle × multiplicateur de certitude (INFERRED 0.6, DECLARED 0.9, OFFICIAL 1.0), pondérations fixes en code, zéro LLM (verrouillé par test).
 - 2026-07-05 — Templates de notifications/emails définis en code (typés), listés en Console avec envoi de test ; pas de table de templates éditables (sobriété — le cahier ne demande pas d'éditeur).
 - 2026-07-05 — Chiffrement vault credentials : AES-256-GCM, clé dérivée HKDF de NEXTAUTH_SECRET (surcharge possible via VAULT_SECRET) — zéro dépendance, secrets système restent en env.
+- 2026-07-05 — Branche `main` créée sur GitHub via l'API (base du commit Phase 0) : le repo distant était né sans branche par défaut, une PR exige une base. Draft PR #1 ouverte.
+- 2026-07-05 — CI rouge au 1er push (typecheck) : leçon — relancer typecheck localement avant CHAQUE commit, pas seulement au scaffold. Augmentation de types JWT corrigée vers `@auth/core/jwt` (le module façade `next-auth/jwt` ne fusionne pas avec l'identité réelle des callbacks).
+- 2026-07-05 — @playwright/test pinné ~1.56.0 : c'est la version appariée au chromium-1194 préinstallé dans l'environnement de dev distant ; la CI télécharge son navigateur et reste alignée.
+- 2026-07-05 — Pas de page /inscription : l'entrée canonique d'un compte founder est le diagnostic (activation) ; la page connexion pointe vers /diagnostic. Talents/agences s'inscrivent via la Guilde (S7).
+- 2026-07-05 — Témoignages de la landing rédigés depuis l'univers de démo seedé (Awa Cissé/Nyama Café, Moussa Diop/Guilde) — cohérents avec les données produit, à remplacer par de vrais verbatims client par l'opérateur.
+- 2026-07-05 — JALON PHASE 1 : funnel complet E2E vert (landing → intake → résultat scoré → paywall → activation → cockpit) + connexion démo + mobile. 3/3 Playwright.

@@ -19,7 +19,9 @@ declare module "next-auth" {
   }
 }
 
-declare module "next-auth/jwt" {
+// Les callbacks NextAuth typent `token` avec l'identité @auth/core/jwt —
+// augmenter le module façade "next-auth/jwt" ne fusionne pas avec elle.
+declare module "@auth/core/jwt" {
   interface JWT {
     uid?: string;
     roles?: Role[];
