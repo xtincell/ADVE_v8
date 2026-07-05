@@ -108,8 +108,8 @@ export default async function MissionPage({ params }: { params: Promise<{ slug: 
             <p className="mt-1 text-sm text-ink-muted">
               Déposez votre candidature avec un devis structuré depuis votre espace Creator.
             </p>
-            <Link href="/creator" className={buttonClass({ className: "mt-3" })}>
-              Ouvrir mon espace Creator
+            <Link href={`/creator/missions/${mission.slug}`} className={buttonClass({ className: "mt-3" })}>
+              Candidater avec un devis
             </Link>
           </>
         ) : (

@@ -124,8 +124,8 @@
     {
       "id": "S7.guild",
       "scope": "§13.7 Guilde : mur public, fiches slug, dépôt (marque shell), inscriptions talent/agence, modération, candidatures, devis",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "E2E complet vert : dépôt public (marque shell, contact protégé) → invisible avant modération → publication ops → candidature talent avec devis structuré multi-postes → arbitrage (retenir/présélection/refus, jamais 1er-arrivé) → mission ASSIGNED + Earning 25% Compagnon + notification talent. Inscriptions talent (E2E) et agence publiques. Assist LLM du brief branché en X.llm."
     },
     {
       "id": "S8.notifications",

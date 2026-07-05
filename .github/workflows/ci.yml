@@ -43,7 +43,7 @@ jobs:
       - name: Préparer l'artefact standalone (statiques + public)
         run: |
           cp -r .next/static .next/standalone/.next/static
-          cp -r public .next/standalone/public
+          if [ -d public ]; then cp -r public .next/standalone/public; fi
       - name: E2E (parcours d'argent, servis par le standalone)
         run: |
           npx playwright install --with-deps chromium

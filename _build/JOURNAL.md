@@ -36,3 +36,6 @@ Une ligne par décision. Format : `AAAA-MM-JJ — décision`.
 - 2026-07-05 — CI corrigée : (1) le provider MOCK est gaté par flag explicite + verrou anti-prod sur l'URL publique (la CI exécute un build production sur localhost — NODE_ENV seul était faux) ; (2) la CI sert désormais le VRAI artefact standalone (node .next/standalone/server.js + statiques copiées), ce qui valide l'artefact à chaque run.
 - 2026-07-05 — S6 : l'édition opérateur des piliers passe par les mêmes pages et le même point d'écriture unique que le founder (?marque= + contrôle d'accès getOwnedBrand) — zéro double implémentation.
 - 2026-07-05 — Playwright expect.timeout 15s : la compilation à la volée du dev server rendait les assertions 5s flaky ; la CI précompilée n'est pas concernée.
+- 2026-07-05 — S7 : l'acceptation d'une candidature refuse proprement les autres candidatures ouvertes de la mission (décision opérateur unique) et crée le relevé de commission au taux du tier talent (config).
+- 2026-07-05 — CI : public/ n'existait pas dans le checkout (dossier vide non tracké) — robots.txt réel + favicon (icon.svg App Router) ajoutés, étape de copie standalone rendue tolérante.
+- 2026-07-06 — Les emails transactionnels du cycle Guilde (décision de modération au déposant sans compte) partiront avec la cascade email S8 — noté, pas de façade.

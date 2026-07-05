@@ -7,6 +7,7 @@ const NAV: NavItem[] = [
   { href: "/console", label: "Vue d'ensemble", exact: true },
   { href: "/console/marques", label: "Portefeuille" },
   { href: "/console/argent", label: "Argent" },
+  { href: "/console/guilde", label: "Guilde" },
   { href: "/console/comptes", label: "Comptes" },
   { href: "/console/vault", label: "Vault" },
   { href: "/console/config", label: "Config" },

@@ -24,6 +24,9 @@ const COLUMNS: { title: string; links: { href: string; label: string }[] }[] = [
     title: "La Guilde",
     links: [
       { href: "/guilde", label: "Missions ouvertes" },
+      { href: "/guilde/deposer", label: "Déposer une mission" },
+      { href: "/guilde/talents", label: "Devenir talent" },
+      { href: "/guilde/agences", label: "Agences partenaires" },
       { href: "/blog", label: "Blog" },
     ],
   },
