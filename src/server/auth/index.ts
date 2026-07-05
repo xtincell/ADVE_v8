@@ -27,7 +27,7 @@ function googleEnabled(): boolean {
   return !!(env().GOOGLE_CLIENT_ID && env().GOOGLE_CLIENT_SECRET);
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const { handlers, auth, signIn, signOut, unstable_update: updateSession } = NextAuth({
   adapter: PrismaAdapter(db),
   session: { strategy: "jwt" },
   secret: env().NEXTAUTH_SECRET,

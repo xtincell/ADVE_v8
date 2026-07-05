@@ -142,6 +142,38 @@
   }
 }
 
+/* Prose des articles (blog, contenus markdown) */
+.prose-blog {
+  color: var(--ink);
+  line-height: 1.7;
+}
+.prose-blog h2 {
+  margin-top: 2rem;
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+.prose-blog h3 {
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.prose-blog p {
+  margin-top: 0.9rem;
+}
+.prose-blog ul,
+.prose-blog ol {
+  margin-top: 0.9rem;
+  padding-left: 1.4rem;
+}
+.prose-blog ul { list-style: disc; }
+.prose-blog ol { list-style: decimal; }
+.prose-blog li { margin-top: 0.35rem; }
+.prose-blog a {
+  color: var(--accent);
+  text-decoration: underline;
+}
+.prose-blog strong { font-weight: 700; }
+
 /* Texture géométrique discrète (identité UPgraders) */
 .texture-geo {
   background-image: radial-gradient(color-mix(in srgb, var(--ink) 7%, transparent) 1px, transparent 1px);

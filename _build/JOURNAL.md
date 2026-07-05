@@ -16,3 +16,9 @@ Une ligne par décision. Format : `AAAA-MM-JJ — décision`.
 - 2026-07-05 — Pas de page /inscription : l'entrée canonique d'un compte founder est le diagnostic (activation) ; la page connexion pointe vers /diagnostic. Talents/agences s'inscrivent via la Guilde (S7).
 - 2026-07-05 — Témoignages de la landing rédigés depuis l'univers de démo seedé (Awa Cissé/Nyama Café, Moussa Diop/Guilde) — cohérents avec les données produit, à remplacer par de vrais verbatims client par l'opérateur.
 - 2026-07-05 — JALON PHASE 1 : funnel complet E2E vert (landing → intake → résultat scoré → paywall → activation → cockpit) + connexion démo + mobile. 3/3 Playwright.
+- 2026-07-05 — S2 : contenu légal FR rédigé de zéro (v1 absent) — structure opposable réelle, faits société marqués [À COMPLÉTER] jamais inventés ; à faire relire par l'opérateur/un conseil.
+- 2026-07-05 — Blog en fichiers markdown (content/blog) rendus par `marked` (dep légère justifiée) : zéro table, zéro CMS ; l'opérateur publie en commitant.
+- 2026-07-05 — Contact sans formulaire : WhatsApp (canal roi, wa.me depuis env) + email — pas de table ContactMessage, sobriété.
+- 2026-07-05 — Mur public Guilde + fiches mission livrés en avance (S7) : les liens de navigation existaient et les données seedées les rendent réels ; dépôt/inscriptions/candidatures restent en S7.
+- 2026-07-05 — Shells Console/Creator/Agency créés : les rôles seedés atterrissaient sur des 404 post-login. Console protégée par MFA TOTP effectif dès maintenant (enrôlement /mfa autonome + refresh de session unstable_update).
+- 2026-07-05 — /realisations : uniquement des marques réellement pilotées dans l'outil (score + progression depuis 1er snapshot) — pas de mur de logos inventé.

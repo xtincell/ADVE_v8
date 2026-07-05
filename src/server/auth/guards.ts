@@ -48,6 +48,6 @@ export async function requireRole(roles: Role[], next?: string): Promise<Session
 /** MFA TOTP obligatoire pour ADMIN (cahier §11.2) : force l'enrôlement avant la Console. */
 export async function requireAdminWithMfa(next?: string): Promise<SessionUser> {
   const user = await requireRole(["ADMIN", "OPERATOR"], next);
-  if (user.roles.includes("ADMIN") && !user.mfaEnabled) redirect("/console/mfa");
+  if (user.roles.includes("ADMIN") && !user.mfaEnabled) redirect("/mfa");
   return user;
 }
