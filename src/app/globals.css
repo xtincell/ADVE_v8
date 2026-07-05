@@ -1,0 +1,149 @@
+@import "tailwindcss";
+
+/* ════════════════════════════════════════════════════════════
+   Design tokens UPgraders — 2 niveaux (cahier §10)
+   Niveau 1 : référence (palette brute). Niveau 2 : sémantique.
+   Les composants n'utilisent QUE les tokens sémantiques.
+   ════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── Niveau 1 · référence ── */
+  --ref-noir-950: #0c0a08;
+  --ref-noir-900: #16130f;
+  --ref-noir-800: #211d18;
+  --ref-noir-700: #2e2922;
+  --ref-noir-500: #57503f;
+  --ref-noir-400: #7a7260;
+  --ref-bone-50: #fbf9f5;
+  --ref-bone-100: #f6f2ea;
+  --ref-bone-200: #efe8dc;
+  --ref-bone-300: #e2d8c6;
+  --ref-bone-400: #c9bda5;
+  --ref-corail-100: #fcebe9;
+  --ref-corail-300: #f0a29a;
+  --ref-corail-500: #e56458;
+  --ref-corail-600: #cf4d41;
+  --ref-corail-700: #ae3c31;
+  --ref-or-100: #fef7d8;
+  --ref-or-400: #facc15;
+  --ref-or-600: #ca8a04;
+  --ref-vert-100: #e3f4ea;
+  --ref-vert-500: #2f9e63;
+  --ref-vert-700: #1f6b43;
+  --ref-rouge-100: #fde8e6;
+  --ref-rouge-600: #c2372a;
+  --ref-bleu-100: #e5eefb;
+  --ref-bleu-600: #2c6cc4;
+
+  /* ── Niveau 2 · sémantique (mode clair) ── */
+  --surface: var(--ref-bone-100);
+  --surface-raised: var(--ref-bone-50);
+  --surface-sunken: var(--ref-bone-200);
+  --surface-inverse: var(--ref-noir-950);
+  --ink: var(--ref-noir-950);
+  --ink-muted: var(--ref-noir-500);
+  --ink-faint: var(--ref-noir-400);
+  --ink-inverse: var(--ref-bone-100);
+  --accent: var(--ref-corail-500);
+  --accent-strong: var(--ref-corail-600);
+  --accent-soft: var(--ref-corail-100);
+  --accent-ink: #ffffff;
+  --gold: var(--ref-or-400);
+  --gold-strong: var(--ref-or-600);
+  --gold-soft: var(--ref-or-100);
+  --line: var(--ref-bone-300);
+  --line-strong: var(--ref-bone-400);
+  --success: var(--ref-vert-500);
+  --success-soft: var(--ref-vert-100);
+  --danger: var(--ref-rouge-600);
+  --danger-soft: var(--ref-rouge-100);
+  --info: var(--ref-bleu-600);
+  --info-soft: var(--ref-bleu-100);
+}
+
+[data-theme="dark"] {
+  --surface: var(--ref-noir-950);
+  --surface-raised: var(--ref-noir-900);
+  --surface-sunken: var(--ref-noir-800);
+  --surface-inverse: var(--ref-bone-100);
+  --ink: var(--ref-bone-100);
+  --ink-muted: var(--ref-bone-400);
+  --ink-faint: var(--ref-noir-400);
+  --ink-inverse: var(--ref-noir-950);
+  --accent-soft: #3b201c;
+  --gold-soft: #322a10;
+  --line: var(--ref-noir-800);
+  --line-strong: var(--ref-noir-700);
+  --success-soft: #12291c;
+  --danger-soft: #331512;
+  --info-soft: #16233a;
+}
+
+@theme inline {
+  /* Couleurs — uniquement les sémantiques */
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-surface-sunken: var(--surface-sunken);
+  --color-surface-inverse: var(--surface-inverse);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-ink-inverse: var(--ink-inverse);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-ink);
+  --color-gold: var(--gold);
+  --color-gold-strong: var(--gold-strong);
+  --color-gold-soft: var(--gold-soft);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+
+  /* Typo */
+  --font-display: var(--font-clash), "Arial Black", sans-serif;
+  --font-sans: var(--font-satoshi), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  /* Rayons « du cube au cercle » : 6 → 36 px */
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-2xl: 36px;
+}
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  [data-theme="dark"] {
+    color-scheme: dark;
+  }
+  body {
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-satoshi), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    font-family: var(--font-clash), "Arial Black", sans-serif;
+    letter-spacing: -0.01em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+/* Texture géométrique discrète (identité UPgraders) */
+.texture-geo {
+  background-image: radial-gradient(color-mix(in srgb, var(--ink) 7%, transparent) 1px, transparent 1px);
+  background-size: 22px 22px;
+}

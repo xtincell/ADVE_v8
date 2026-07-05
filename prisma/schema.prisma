@@ -1,0 +1,973 @@
+// La Fusée v2 — schéma de données (~38 tables, budget cahier §14 : ≤ 60)
+// Principe : modéliser ce que l'UI lit/écrit — une table sans surface réelle ne naît pas.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────── Enums
+
+enum Role {
+  ADMIN
+  OPERATOR
+  FOUNDER
+  TALENT
+  AGENCY
+  USER
+}
+
+enum PillarKind {
+  AUTHENTICITE // A
+  DISTINCTION // D
+  VALEUR // V
+  ENGAGEMENT // E
+  RISQUE // R
+  TRACK // T
+  INNOVATION // I
+  STRATEGIE // S
+}
+
+enum Certainty {
+  DECLARED // saisi par l'humain
+  INFERRED // pré-rempli par l'IA, à valider
+  OFFICIAL // validé
+}
+
+enum AmendMode {
+  DIRECT // édition directe
+  LLM_REFORMULATE // reformulation assistée
+  LLM_STRATEGIC // réécriture stratégique assistée
+  RTIS_REFRESH // recalcul RTIS (piliers dérivés uniquement)
+  INTAKE // création depuis l'intake
+  SEED
+}
+
+enum BrandTier {
+  LATENT
+  FRAGILE
+  ORDINAIRE
+  FORTE
+  CULTE
+  ICONE
+}
+
+enum DevotionLevel {
+  SPECTATEUR
+  INTERESSE
+  PARTICIPANT
+  ENGAGE
+  AMBASSADEUR
+  EVANGELISTE
+}
+
+enum TalentTier {
+  APPRENTI
+  COMPAGNON
+  MAITRE
+  ASSOCIE
+}
+
+enum PlanTier {
+  INTAKE_FREE
+  INTAKE_PDF
+  ORACLE_FULL
+  COCKPIT_MONTHLY
+  RETAINER_BASE
+  RETAINER_PRO
+  RETAINER_ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  PENDING_MANUAL // paiement manuel WhatsApp en attente de validation — n'ouvre aucun droit
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentProvider {
+  STRIPE
+  WAVE
+  MTN_MOMO
+  ORANGE_MONEY
+  CINETPAY
+  PAYPAL
+  MANUAL_WHATSAPP
+  MOCK // dev/tests uniquement — refusé en production
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  CANCELED
+}
+
+enum IntakeStatus {
+  DRAFT
+  SUBMITTED
+  SCORED
+  ACTIVATED
+}
+
+enum OracleSectionStatus {
+  PENDING
+  GENERATING
+  COMPLETE
+  FAILED
+  STALE
+}
+
+enum OracleTier {
+  CORE
+  BIG4
+  DISTINCTIVE
+}
+
+enum AssetKind {
+  BIG_IDEA
+  CREATIVE_BRIEF
+  MANIFESTO
+  CLAIM
+  POSITIONING
+  PERSONA
+  NAMING
+  KV
+  LOGO
+  SCRIPT
+  LONG_COPY
+  PITCH
+  BRAND_BIBLE
+  INTAKE_REPORT
+}
+
+enum AssetStatus {
+  DRAFT
+  ACTIVE
+  SUPERSEDED
+  ARCHIVED
+}
+
+enum MissionStatus {
+  PENDING_REVIEW // déposée, en attente de modération
+  PUBLISHED
+  REJECTED
+  ASSIGNED
+  COMPLETED
+  CANCELED
+}
+
+enum ApplicationStatus {
+  SUBMITTED
+  SHORTLISTED
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum EarningStatus {
+  PENDING
+  APPROVED
+  PAID
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED_CLIENT
+  RESOLVED_TALENT
+  CANCELED
+}
+
+enum RequestStatus {
+  OPEN
+  IN_PROGRESS
+  DONE
+  DECLINED
+}
+
+enum ActionStatus {
+  TODO
+  DOING
+  DONE
+  CANCELED
+}
+
+enum NotificationType {
+  SCORE_UPDATED
+  PILLAR_STALE
+  PAYMENT_RECEIVED
+  SUBSCRIPTION_ACTIVATED
+  SUBSCRIPTION_PENDING
+  ORACLE_READY
+  MISSION_SUBMITTED
+  MISSION_MODERATED
+  MISSION_APPLICATION
+  APPLICATION_DECIDED
+  REQUEST_ANSWERED
+  DIGEST
+  SYSTEM
+}
+
+enum EmailStatus {
+  QUEUED
+  SENT
+  FAILED
+  DEFERRED // aucun provider email configuré
+}
+
+enum SignalSource {
+  WORLD_BANK
+  RSS_NEWS
+  MANUAL
+}
+
+enum SourceKind {
+  LINK
+  DOCUMENT
+  NOTE
+}
+
+// ─────────────────────────────── Tenancy & comptes
+
+/// Le tenant : UPgraders (ou une agence fille) qui opère des marques.
+model Operator {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users          User[]
+  brands         Brand[]
+  intakeSessions IntakeSession[]
+  priceRules     PriceRule[]
+  subscriptions  Subscription[]
+  payments       Payment[]
+  invoices       Invoice[]
+  credentials    Credential[]
+  missions       Mission[]
+  talentProfiles TalentProfile[]
+  agencyProfiles AgencyProfile[]
+  earnings       Earning[]
+  disputes       Dispute[]
+  emailLogs      EmailLog[]
+  marketSignals  MarketSignal[]
+  mcpApiKeys     McpApiKey[]
+  mcpStatements  McpStatement[]
+  llmCalls       LlmCall[]
+  auditLogs      AuditLog[]
+  settings       Setting[]
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  passwordHash  String?
+  image         String?
+  roles         Role[]    @default([USER])
+  operatorId    String?
+  operator      Operator? @relation(fields: [operatorId], references: [id])
+  locale        String    @default("fr")
+  country       String? // code ISO2
+  phone         String?
+  mfaSecret     String? // chiffré (vault)
+  mfaEnabled    Boolean   @default(false)
+  emailVerified DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  accounts          Account[]
+  brands            Brand[] // marques dont il est founder
+  notifications     Notification[]
+  pushSubscriptions PushSubscription[]
+  subscriptions     Subscription[]
+  payments          Payment[]
+  talentProfile     TalentProfile?
+  agencyProfile     AgencyProfile?
+  applications      MissionApplication[]
+  earnings          Earning[]
+  requests          BrandRequest[]
+  mcpApiKeys        McpApiKey[]
+}
+
+/// Comptes OAuth (NextAuth) — utilisé uniquement si Google est configuré.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  @@unique([provider, providerAccountId])
+}
+
+// ─────────────────────────────── Marques & méthode ADVE/RTIS
+
+model Brand {
+  id         String    @id @default(cuid())
+  operatorId String
+  operator   Operator  @relation(fields: [operatorId], references: [id])
+  slug       String
+  name       String
+  sector     String?
+  country    String? // code ISO2
+  city       String?
+  founderId  String?
+  founder    User?     @relation(fields: [founderId], references: [id])
+  parentId   String? // hiérarchie parent-enfant simple
+  parent     Brand?    @relation("BrandHierarchy", fields: [parentId], references: [id])
+  children   Brand[]   @relation("BrandHierarchy")
+  isShell    Boolean   @default(false) // client « shell » créé par dépôt de mission Guilde
+  isDemo     Boolean   @default(false)
+  score      Int       @default(0) // composite /200
+  tier       BrandTier @default(LATENT)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  pillars          Pillar[]
+  snapshots        BrandSnapshot[]
+  sources          BrandSource[]
+  oracleReports    OracleReport[]
+  assets           BrandAsset[]
+  subscriptions    Subscription[]
+  payments         Payment[]
+  missions         Mission[]
+  communityMembers CommunityMember[]
+  marketSignals    MarketSignal[]
+  actions          BrandAction[]
+  requests         BrandRequest[]
+  intakeSessions   IntakeSession[]
+  llmCalls         LlmCall[]
+
+  @@unique([operatorId, slug])
+}
+
+/// Un pilier = une ligne. Champs en JSON : { [key]: { value, certainty, updatedAt } }.
+/// Écriture UNIQUEMENT via le point d'écriture unique (src/server/brands/amend.ts).
+model Pillar {
+  id          String     @id @default(cuid())
+  brandId     String
+  brand       Brand      @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  kind        PillarKind
+  fields      Json       @default("{}")
+  score       Int        @default(0) // /25, déterministe
+  version     Int        @default(0)
+  stale       Boolean    @default(false) // piliers dérivés : périmé depuis le dernier amendement ADVE
+  staleAt     DateTime?
+  staleReason String?
+  refreshedAt DateTime? // dernier recalcul (RTIS)
+  updatedAt   DateTime   @updatedAt
+
+  versions PillarVersion[]
+
+  @@unique([brandId, kind])
+}
+
+model PillarVersion {
+  id          String    @id @default(cuid())
+  pillarId    String
+  pillar      Pillar    @relation(fields: [pillarId], references: [id], onDelete: Cascade)
+  version     Int
+  fields      Json
+  score       Int
+  mode        AmendMode
+  authorId    String?
+  authorEmail String?
+  note        String?
+  createdAt   DateTime  @default(now())
+
+  @@unique([pillarId, version])
+}
+
+/// Historisation : score, Cult Index, répartition Devotion Ladder, followers.
+model BrandSnapshot {
+  id           String   @id @default(cuid())
+  brandId      String
+  brand        Brand    @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  score        Int
+  tier         BrandTier
+  pillarScores Json // { AUTHENTICITE: 18, ... }
+  cultIndex    Int? // null = INSUFFISANT (honest-empty)
+  devotion     Json? // { SPECTATEUR: n, ... } — null si aucune donnée
+  followers    Int?
+  createdAt    DateTime @default(now())
+
+  @@index([brandId, createdAt])
+}
+
+model BrandSource {
+  id        String     @id @default(cuid())
+  brandId   String
+  brand     Brand      @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  kind      SourceKind
+  title     String
+  url       String?
+  content   String?
+  createdAt DateTime   @default(now())
+}
+
+/// Session d'intake publique, accessible par token sans compte.
+model IntakeSession {
+  id          String       @id @default(cuid())
+  token       String       @unique
+  operatorId  String
+  operator    Operator     @relation(fields: [operatorId], references: [id])
+  status      IntakeStatus @default(DRAFT)
+  email       String?
+  brandName   String?
+  answers     Json         @default("{}")
+  draftFields Json? // ébauche ADVE { pillarKind: { fieldKey: {value, certainty} } }
+  score       Int?
+  tier        BrandTier?
+  llmAssisted Boolean      @default(false)
+  brandId     String? // marque créée à l'activation
+  brand       Brand?       @relation(fields: [brandId], references: [id])
+  submittedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  payments Payment[]
+}
+
+// ─────────────────────────────── Oracle & assets
+
+model OracleReport {
+  id             String    @id @default(cuid())
+  brandId        String
+  brand          Brand     @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  version        Int
+  scoreAtGen     Int
+  tierAtGen      BrandTier
+  pillarsHash    String // hash du snapshot des piliers au moment de la génération
+  pillarsFrozen  Json // snapshot des piliers (le rapport ne dit que ce que la marque a déclaré)
+  stale          Boolean   @default(false)
+  generatedById  String?
+  lastExportedAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  sections OracleSection[]
+
+  @@unique([brandId, version])
+}
+
+model OracleSection {
+  id          String              @id @default(cuid())
+  reportId    String
+  report      OracleReport        @relation(fields: [reportId], references: [id], onDelete: Cascade)
+  number      Int // 1..35
+  title       String
+  tier        OracleTier
+  status      OracleSectionStatus @default(PENDING)
+  content     Json?
+  error       String?
+  llmUsed     Boolean             @default(false)
+  generatedAt DateTime?
+
+  @@unique([reportId, number])
+}
+
+model BrandAsset {
+  id          String      @id @default(cuid())
+  brandId     String
+  brand       Brand       @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  kind        AssetKind
+  title       String
+  content     Json
+  status      AssetStatus @default(DRAFT)
+  version     Int         @default(1)
+  staleAt     DateTime? // péremption quand l'ADVE bouge
+  llmUsed     Boolean     @default(false)
+  createdById String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([brandId, kind])
+}
+
+// ─────────────────────────────── Prix, offres, paiements
+
+model Country {
+  code       String  @id // ISO2
+  name       String
+  zone       String // UEMOA | CEMAC | DIASPORA | OTHER
+  currency   String // XOF | XAF | EUR | USD
+  priceIndex Float   @default(1.0)
+  active     Boolean @default(true)
+}
+
+/// Grille tarifaire localisée — donnée de config seedée, modifiable en Console. Jamais en dur.
+model PriceRule {
+  id         String   @id @default(cuid())
+  operatorId String
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  tier       PlanTier
+  zone       String // UEMOA | CEMAC | DIASPORA | OTHER
+  amount     Int // FCFA entiers (ou centimes EUR/USD pour DIASPORA)
+  currency   String
+  active     Boolean  @default(true)
+
+  @@unique([operatorId, tier, zone])
+}
+
+model Subscription {
+  id               String             @id @default(cuid())
+  operatorId       String
+  operator         Operator           @relation(fields: [operatorId], references: [id])
+  userId           String
+  user             User               @relation(fields: [userId], references: [id])
+  brandId          String?
+  brand            Brand?             @relation(fields: [brandId], references: [id])
+  tier             PlanTier
+  status           SubscriptionStatus
+  provider         PaymentProvider
+  providerRef      String? // ex : Stripe subscription id
+  currentPeriodEnd DateTime?
+  canceledAt       DateTime?
+  validatedById    String? // validation manuelle (WhatsApp)
+  validatedAt      DateTime?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+
+  payments Payment[]
+
+  @@index([userId, status])
+}
+
+model Payment {
+  id              String          @id @default(cuid())
+  operatorId      String
+  operator        Operator        @relation(fields: [operatorId], references: [id])
+  userId          String?
+  user            User?           @relation(fields: [userId], references: [id])
+  brandId         String?
+  brand           Brand?          @relation(fields: [brandId], references: [id])
+  intakeSessionId String?
+  intakeSession   IntakeSession?  @relation(fields: [intakeSessionId], references: [id])
+  subscriptionId  String?
+  subscription    Subscription?   @relation(fields: [subscriptionId], references: [id])
+  tier            PlanTier?
+  provider        PaymentProvider
+  providerRef     String? // id de session/transaction chez le provider
+  amount          Int
+  currency        String
+  status          PaymentStatus   @default(PENDING)
+  idempotencyKey  String?         @unique
+  metadata        Json?
+  validatedById   String? // opérateur ayant validé un paiement manuel
+  validatedAt     DateTime?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  invoice Invoice?
+
+  @@index([operatorId, status])
+}
+
+/// Idempotence des webhooks (un événement provider n'est traité qu'une fois).
+model WebhookEvent {
+  id         String    @id @default(cuid())
+  provider   PaymentProvider
+  externalId String
+  receivedAt DateTime  @default(now())
+  processedAt DateTime?
+  error      String?
+
+  @@unique([provider, externalId])
+}
+
+model Invoice {
+  id         String   @id @default(cuid())
+  number     String   @unique // FUS-2026-000001
+  operatorId String
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  paymentId  String   @unique
+  payment    Payment  @relation(fields: [paymentId], references: [id])
+  toName     String
+  toEmail    String
+  lines      Json // [{label, amount}]
+  amount     Int
+  currency   String
+  issuedAt   DateTime @default(now())
+}
+
+/// Vault de credentials par opérateur (connecteurs externes). Valeurs chiffrées AES-256-GCM.
+/// Les secrets SYSTÈME (Stripe, DB, SMTP…) restent en variables d'env.
+model Credential {
+  id         String   @id @default(cuid())
+  operatorId String
+  operator   Operator @relation(fields: [operatorId], references: [id])
+  provider   String // wave | mtn_momo | orange_money | cinetpay | paypal | resend | mailgun | sendgrid | vapid | ...
+  label      String?
+  encrypted  String // JSON chiffré des clés
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([operatorId, provider])
+}
+
+// ─────────────────────────────── La Guilde
+
+model Mission {
+  id               String        @id @default(cuid())
+  operatorId       String
+  operator         Operator      @relation(fields: [operatorId], references: [id])
+  brandId          String?
+  brand            Brand?        @relation(fields: [brandId], references: [id])
+  slug             String        @unique
+  title            String
+  summary          String
+  brief            Json // structuré : contexte, objectifs, livrables, contraintes
+  skills           String[]      @default([])
+  sector           String?
+  country          String?
+  budgetMin        Int?
+  budgetMax        Int?
+  currency         String        @default("XOF")
+  deadline         DateTime?
+  contactName      String
+  contactEmail     String
+  contactPhone     String?
+  status           MissionStatus @default(PENDING_REVIEW)
+  publishedAt      DateTime?
+  rejectedReason   String?
+  moderatedById    String?
+  assignedTalentId String?
+  llmAssisted      Boolean       @default(false)
+  isDemo           Boolean       @default(false)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  applications MissionApplication[]
+  earnings     Earning[]
+  disputes     Dispute[]
+
+  @@index([status, publishedAt])
+}
+
+model MissionApplication {
+  id          String            @id @default(cuid())
+  missionId   String
+  mission     Mission           @relation(fields: [missionId], references: [id], onDelete: Cascade)
+  talentId    String
+  talent      User              @relation(fields: [talentId], references: [id])
+  status      ApplicationStatus @default(SUBMITTED)
+  message     String?
+  quote       Json? // devis structuré : [{label, amount}], délai, conditions
+  quoteAmount Int?
+  decidedById String?
+  decidedAt   DateTime?
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  earnings Earning[]
+
+  @@unique([missionId, talentId])
+}
+
+model TalentProfile {
+  id           String     @id @default(cuid())
+  userId       String     @unique
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  operatorId   String
+  operator     Operator   @relation(fields: [operatorId], references: [id])
+  headline     String?
+  bio          String?
+  skills       String[]   @default([])
+  portfolio    Json? // [{title, url}]
+  country      String?
+  city         String?
+  tier         TalentTier @default(APPRENTI)
+  whatsapp     String?
+  available    Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+}
+
+model AgencyProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  operatorId  String
+  operator    Operator @relation(fields: [operatorId], references: [id])
+  name        String
+  description String?
+  services    String[] @default([])
+  country     String?
+  website     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+/// Relevé de commission talent — taux dégressif par tier (config), visible Console + Creator.
+model Earning {
+  id               String        @id @default(cuid())
+  operatorId       String
+  operator         Operator      @relation(fields: [operatorId], references: [id])
+  talentId         String
+  talent           User          @relation(fields: [talentId], references: [id])
+  missionId        String?
+  mission          Mission?      @relation(fields: [missionId], references: [id])
+  applicationId    String?
+  application      MissionApplication? @relation(fields: [applicationId], references: [id])
+  grossAmount      Int
+  commissionRate   Float // ex : 0.25
+  commissionAmount Int
+  netAmount        Int
+  currency         String        @default("XOF")
+  status           EarningStatus @default(PENDING)
+  paidAt           DateTime?
+  payoutProvider   PaymentProvider?
+  payoutRef        String?
+  createdAt        DateTime      @default(now())
+
+  @@index([talentId, status])
+}
+
+/// Litiges : suivi + arbitrage manuel opérateur (pas d'escrow automatisé en v2.0).
+model Dispute {
+  id           String        @id @default(cuid())
+  operatorId   String
+  operator     Operator      @relation(fields: [operatorId], references: [id])
+  missionId    String
+  mission      Mission       @relation(fields: [missionId], references: [id])
+  openedById   String
+  reason       String
+  status       DisputeStatus @default(OPEN)
+  resolution   String?
+  resolvedById String?
+  resolvedAt   DateTime?
+  createdAt    DateTime      @default(now())
+}
+
+// ─────────────────────────────── Notifications & comms
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  title     String
+  body      String?
+  href      String?
+  data      Json?
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, createdAt])
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+}
+
+model EmailLog {
+  id         String      @id @default(cuid())
+  operatorId String?
+  operator   Operator?   @relation(fields: [operatorId], references: [id])
+  toEmail    String
+  template   String
+  subject    String
+  provider   String? // resend | mailgun | sendgrid
+  status     EmailStatus
+  error      String?
+  sentAt     DateTime?
+  createdAt  DateTime    @default(now())
+}
+
+// ─────────────────────────────── Intelligence & télémétrie
+
+/// Membre de communauté / superfan — saisie manual-first, échelle Devotion Ladder.
+model CommunityMember {
+  id        String        @id @default(cuid())
+  brandId   String
+  brand     Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  name      String
+  handle    String?
+  channel   String? // instagram | tiktok | whatsapp | irl | ...
+  level     DevotionLevel @default(SPECTATEUR)
+  note      String?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@index([brandId, level])
+}
+
+/// Signal marché réel (World Bank, RSS presse) — jamais fabriqué.
+model MarketSignal {
+  id          String       @id @default(cuid())
+  operatorId  String
+  operator    Operator     @relation(fields: [operatorId], references: [id])
+  brandId     String?
+  brand       Brand?       @relation(fields: [brandId], references: [id])
+  sector      String?
+  source      SignalSource
+  title       String
+  url         String?
+  summary     String?
+  data        Json?
+  publishedAt DateTime?
+  fetchedAt   DateTime     @default(now())
+
+  @@index([brandId, fetchedAt])
+}
+
+/// Action de la roadmap / calendrier d'une marque.
+model BrandAction {
+  id          String       @id @default(cuid())
+  brandId     String
+  brand       Brand        @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  pillarKind  PillarKind?
+  status      ActionStatus @default(TODO)
+  startAt     DateTime?
+  dueAt       DateTime?
+  createdById String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([brandId, status])
+}
+
+/// Demande d'un founder à l'opérateur.
+model BrandRequest {
+  id            String        @id @default(cuid())
+  brandId       String
+  brand         Brand         @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  authorId      String
+  author        User          @relation(fields: [authorId], references: [id])
+  subject       String
+  message       String
+  status        RequestStatus @default(OPEN)
+  response      String?
+  respondedById String?
+  respondedAt   DateTime?
+  createdAt     DateTime      @default(now())
+}
+
+// ─────────────────────────────── MCP facturable
+
+model McpApiKey {
+  id         String    @id @default(cuid())
+  operatorId String
+  operator   Operator  @relation(fields: [operatorId], references: [id])
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id])
+  label      String
+  keyHash    String    @unique // SHA-256 — la clé n'est affichée qu'une fois
+  prefix     String // 8 premiers caractères, pour affichage
+  active     Boolean   @default(true)
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+  createdAt  DateTime  @default(now())
+
+  calls      McpCall[]
+  statements McpStatement[]
+}
+
+model McpCall {
+  id        String    @id @default(cuid())
+  keyId     String
+  key       McpApiKey @relation(fields: [keyId], references: [id], onDelete: Cascade)
+  tool      String
+  brandId   String?
+  ok        Boolean   @default(true)
+  costUnits Int       @default(1)
+  createdAt DateTime  @default(now())
+
+  @@index([keyId, createdAt])
+}
+
+/// Relevé mensuel gelé.
+model McpStatement {
+  id          String    @id @default(cuid())
+  operatorId  String
+  operator    Operator  @relation(fields: [operatorId], references: [id])
+  keyId       String
+  key         McpApiKey @relation(fields: [keyId], references: [id])
+  periodStart DateTime
+  periodEnd   DateTime
+  callCount   Int
+  amount      Int
+  currency    String    @default("XOF")
+  frozenAt    DateTime  @default(now())
+  paymentId   String?
+
+  @@unique([keyId, periodStart])
+}
+
+// ─────────────────────────────── Transverse
+
+/// Journal des coûts LLM — chaque appel loggé.
+model LlmCall {
+  id         String    @id @default(cuid())
+  operatorId String?
+  operator   Operator? @relation(fields: [operatorId], references: [id])
+  brandId    String?
+  brand      Brand?    @relation(fields: [brandId], references: [id])
+  provider   String
+  model      String
+  purpose    String // intake_prefill | adve_reformulate | oracle_enrich | asset_draft | mission_draft
+  tokensIn   Int       @default(0)
+  tokensOut  Int       @default(0)
+  costUsd    Float     @default(0)
+  ok         Boolean   @default(true)
+  error      String?
+  createdAt  DateTime  @default(now())
+
+  @@index([operatorId, createdAt])
+}
+
+/// Journal d'audit simple : qui a fait quoi, quand, avant/après. Une table, pas une religion.
+model AuditLog {
+  id         String    @id @default(cuid())
+  operatorId String?
+  operator   Operator? @relation(fields: [operatorId], references: [id])
+  actorId    String?
+  actorEmail String?
+  action     String // payment.validate | mission.moderate | pillar.amend | role.change | ...
+  entity     String
+  entityId   String
+  before     Json?
+  after      Json?
+  createdAt  DateTime  @default(now())
+
+  @@index([operatorId, createdAt])
+}
+
+/// Config par opérateur : seuils, taux de commission, numéro WhatsApp, feature flags.
+model Setting {
+  id         String    @id @default(cuid())
+  operatorId String?
+  operator   Operator? @relation(fields: [operatorId], references: [id])
+  key        String
+  value      Json
+
+  @@unique([operatorId, key])
+}

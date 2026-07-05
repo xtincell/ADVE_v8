@@ -1,0 +1,27 @@
+# deps & build
+node_modules/
+.next/
+out/
+dist/
+*.tsbuildinfo
+next-env.d.ts
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# tests
+coverage/
+playwright-report/
+test-results/
+blob-report/
+
+# reference v1 (jamais commité)
+_reference/
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+/uploads
