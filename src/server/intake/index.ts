@@ -188,5 +188,11 @@ export async function activateIntake(token: string, userId: string) {
     data: { status: "ACTIVATED", brandId: brand.id },
   });
 
+  // Les achats faits avant la création du compte suivent la marque (droits Oracle/PDF).
+  await db.payment.updateMany({
+    where: { intakeSessionId: session.id },
+    data: { brandId: brand.id, userId },
+  });
+
   return db.brand.findUniqueOrThrow({ where: { id: brand.id } });
 }

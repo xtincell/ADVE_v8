@@ -10,6 +10,8 @@ import { pillarDef, ADVE_KINDS } from "@/server/brands/pillar-config";
 import { scorePillar, PILLAR_MAX, TIER_LABELS, TIER_BOUNDS } from "@/server/scoring/score";
 import { getDefaultOperator } from "@/server/tenancy";
 import { priceFor } from "@/server/billing/pricing";
+import { checkOneShotGate } from "@/server/billing/gates";
+import { getSessionUser } from "@/server/auth/guards";
 import { PrintButton } from "./print-button";
 
 export const dynamic = "force-dynamic";
@@ -39,6 +41,13 @@ export default async function ResultatPage({ params }: { params: Promise<{ token
   const [pdfPrice, oraclePrice] = await Promise.all([
     priceFor(operator.id, "INTAKE_PDF", answers.country),
     priceFor(operator.id, "ORACLE_FULL", answers.country),
+  ]);
+
+  // Droits déjà acquis sur ce diagnostic (achats one-shot, éventuellement avant compte).
+  const user = await getSessionUser();
+  const [pdfGate, oracleGate] = await Promise.all([
+    checkOneShotGate(user, "INTAKE_PDF", { intakeSessionId: session.id }),
+    checkOneShotGate(user, "ORACLE_FULL", { intakeSessionId: session.id }),
   ]);
 
   const activationHref = `/activation?token=${token}`;
@@ -173,6 +182,12 @@ export default async function ResultatPage({ params }: { params: Promise<{ token
       {/* Paywall */}
       <section className="mt-12 print:hidden">
         <h2 className="text-2xl font-semibold">Aller plus loin</h2>
+        {((!pdfGate.allowed && pdfGate.pending) || (!oracleGate.allowed && oracleGate.pending)) && (
+          <div className="mt-4 rounded-(--radius-md) border border-gold bg-gold-soft px-4 py-3 text-sm">
+            <strong>Paiement en attente de validation.</strong> Un opérateur confirme la réception
+            des fonds en journée — cette page se débloquera automatiquement.
+          </div>
+        )}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <Card>
             <CardContent className="flex h-full flex-col pt-5">
@@ -182,10 +197,18 @@ export default async function ResultatPage({ params }: { params: Promise<{ token
                 Votre diagnostic complet mis en page : score, piliers, analyse des manques,
                 premières recommandations. À partager avec vos associés.
               </p>
-              <p className="mt-4 font-mono text-2xl font-bold">{pdfPrice?.formatted ?? "—"}</p>
-              <Link href={`${activationHref}&offre=INTAKE_PDF`} className={buttonClass({ variant: "outline", className: "mt-3" })}>
-                Obtenir le rapport PDF
-              </Link>
+              {pdfGate.allowed ? (
+                <a href={`/api/intake/${token}/pdf`} className={buttonClass({ variant: "gold", className: "mt-4" })}>
+                  Télécharger mon rapport PDF
+                </a>
+              ) : (
+                <>
+                  <p className="mt-4 font-mono text-2xl font-bold">{pdfPrice?.formatted ?? "—"}</p>
+                  <Link href={`/paiement?offre=INTAKE_PDF&token=${token}`} className={buttonClass({ variant: "outline", className: "mt-3" })}>
+                    Obtenir le rapport PDF
+                  </Link>
+                </>
+              )}
             </CardContent>
           </Card>
           <Card className="border-accent">
@@ -196,10 +219,18 @@ export default async function ResultatPage({ params }: { params: Promise<{ token
                 35 sections : SWOT, plan d&apos;activation 90 jours, budget, KPIs, frameworks
                 Big-4, profil superfan. Le document qui aligne toute votre équipe.
               </p>
-              <p className="mt-4 font-mono text-2xl font-bold">{oraclePrice?.formatted ?? "—"}</p>
-              <Link href={`${activationHref}&offre=ORACLE_FULL`} className={buttonClass({ className: "mt-3" })}>
-                Commander l&apos;Oracle
-              </Link>
+              {oracleGate.allowed ? (
+                <Link href={activationHref} className={buttonClass({ variant: "gold", className: "mt-4" })}>
+                  Oracle acquis — activer mon Cockpit pour le générer
+                </Link>
+              ) : (
+                <>
+                  <p className="mt-4 font-mono text-2xl font-bold">{oraclePrice?.formatted ?? "—"}</p>
+                  <Link href={`/paiement?offre=ORACLE_FULL&token=${token}`} className={buttonClass({ className: "mt-3" })}>
+                    Commander l&apos;Oracle
+                  </Link>
+                </>
+              )}
             </CardContent>
           </Card>
         </div>

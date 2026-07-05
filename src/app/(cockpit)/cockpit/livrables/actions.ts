@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { requireUser } from "@/server/auth/guards";
 import { getOwnedBrand } from "@/server/brands/queries";
+import { checkOneShotGate } from "@/server/billing/gates";
 import { composeSection, generateOracleReport } from "@/server/oracle/generate";
 import { db } from "@/server/db";
 
@@ -12,6 +13,9 @@ export async function generateOracleAction(formData: FormData): Promise<void> {
   const brandId = String(formData.get("brandId") ?? "");
   const brand = await getOwnedBrand(user, brandId);
   if (!brand) return;
+  // Gate one-shot ORACLE_FULL (god-mode et retainers passent) — refus structuré → paywall.
+  const gate = await checkOneShotGate(user, "ORACLE_FULL", { brandId: brand.id });
+  if (!gate.allowed) redirect(`/paiement?offre=ORACLE_FULL&marque=${brand.id}`);
   const report = await generateOracleReport(brand.id, { id: user.id, email: user.email });
   await db.notification.create({
     data: {

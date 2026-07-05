@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/server/auth/guards";
 import { getOwnedBrand } from "@/server/brands/queries";
+import { checkOneShotGate } from "@/server/billing/gates";
 import { db } from "@/server/db";
 import { TIER_LABELS } from "@/server/scoring/score";
 import { generateOracleAction } from "./actions";
@@ -29,6 +30,7 @@ export default async function LivrablesPage() {
     include: { _count: { select: { sections: { where: { status: "COMPLETE" } } } } },
   });
   const stalePillars = await db.pillar.count({ where: { brandId: brand.id, stale: true } });
+  const oracleGate = await checkOneShotGate(user, "ORACLE_FULL", { brandId: brand.id });
 
   return (
     <div className="flex flex-col gap-6">
@@ -41,13 +43,36 @@ export default async function LivrablesPage() {
             gèle un snapshot horodaté et scellé — le rapport ne dit que ce que la marque a déclaré.
           </p>
         </div>
-        <form action={generateOracleAction}>
-          <input type="hidden" name="brandId" value={brand.id} />
-          <Button type="submit" size="lg">
-            Générer l&apos;Oracle ({brand.score}/200)
-          </Button>
-        </form>
+        {oracleGate.allowed ? (
+          <form action={generateOracleAction}>
+            <input type="hidden" name="brandId" value={brand.id} />
+            <Button type="submit" size="lg">
+              Générer l&apos;Oracle ({brand.score}/200)
+            </Button>
+          </form>
+        ) : (
+          <Link href={`/paiement?offre=ORACLE_FULL&marque=${brand.id}`} className={buttonClass({ size: "lg" })}>
+            Débloquer l&apos;Oracle
+          </Link>
+        )}
       </div>
+
+      {!oracleGate.allowed && (
+        <div className="rounded-(--radius-md) border border-line bg-surface-raised px-4 py-3 text-sm">
+          {oracleGate.pending ? (
+            <>
+              <strong>Paiement en attente de validation.</strong> Un opérateur confirme la
+              réception des fonds — la génération se débloquera automatiquement.
+            </>
+          ) : (
+            <>
+              <span className="font-mono text-xs text-ink-faint">TIER_GATE_DENIED · </span>
+              L&apos;Oracle est un achat one-shot par marque (inclus dans les retainers). Vos
+              rapports déjà générés restent consultables ci-dessous.
+            </>
+          )}
+        </div>
+      )}
 
       {stalePillars > 0 && (
         <div className="rounded-(--radius-md) border border-gold bg-gold-soft px-4 py-3 text-sm">

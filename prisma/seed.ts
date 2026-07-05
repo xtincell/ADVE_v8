@@ -182,7 +182,22 @@ async function seedUsers(operatorId: string) {
     },
   });
 
-  return { admin, founder, talent, agency, pendingClient };
+  // Opérateur (rôle OPERATOR sans ADMIN) : accès Console sans exigence MFA — utile en démo/E2E.
+  const ops = await db.user.upsert({
+    where: { email: "ops@demo.test" },
+    update: {},
+    create: {
+      email: "ops@demo.test",
+      name: "Khadija Opératrice",
+      passwordHash: demoHash,
+      roles: ["OPERATOR"],
+      operatorId,
+      country: "SN",
+      emailVerified: new Date(),
+    },
+  });
+
+  return { admin, founder, talent, agency, pendingClient, ops };
 }
 
 async function seedBrandFromCanon(
@@ -556,6 +571,26 @@ async function seedDemoWorld(operatorId: string, users: Awaited<ReturnType<typeo
         lines: [{ label: "Cockpit — abonnement mensuel", amount: 45_000 }] as Prisma.InputJsonValue,
         amount: 45_000,
         currency: "XOF",
+      },
+    });
+  }
+
+  // Le founder démo a acheté l'Oracle (one-shot) — la génération est débloquée pour Nyama.
+  const oraclePaid = await db.payment.findFirst({
+    where: { userId: users.founder.id, tier: "ORACLE_FULL", status: "SUCCEEDED" },
+  });
+  if (!oraclePaid) {
+    await db.payment.create({
+      data: {
+        operatorId,
+        userId: users.founder.id,
+        brandId: nyama.id,
+        tier: "ORACLE_FULL",
+        provider: "MANUAL_WHATSAPP",
+        amount: 95_000,
+        currency: "XOF",
+        status: "SUCCEEDED",
+        validatedAt: new Date(),
       },
     });
   }

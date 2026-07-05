@@ -94,26 +94,26 @@
     {
       "id": "S5.stripe",
       "scope": "§13.5 Stripe checkout + webhooks signés idempotents (one-shots + récurrents)",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "Adapter checkout (one-shot+récurrent, XOF zéro-décimale) + webhook signé corps brut idempotent (completed/invoice.paid/sub.updated) — testable dès clés fournies"
     },
     {
       "id": "S5.manual",
       "scope": "§13.5 Paiement manuel WhatsApp : pending_manual (zéro droit) → file validation Console → activation 30j",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "E2E vert : checkout manuel → référence+wa.me → PENDING sans droit → validation Console (settle audité+facture) → abonnement ACTIF 30j"
     },
     {
       "id": "S5.mobile",
       "scope": "§13.5 Clients HTTP réels Wave/MTN MoMo/Orange Money (+CinetPay/PayPal routing) — DEFERRED_AWAITING_CREDENTIALS sans clés",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "Clients HTTP réels Wave/MoMo/OM/CinetPay/PayPal (vault chiffré) ; DEFERRED_AWAITING_CREDENTIALS affiché (E2E) ; règlement uniquement sur statut re-vérifié provider"
     },
     {
       "id": "S5.gates",
       "scope": "§13.5 Gates premium TIER_GATE_DENIED structuré + god-mode bypass + montants nuls + grille localisée",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "gates.ts TIER_GATE_DENIED structuré + god-mode + montant nul granted + pending state ; Oracle gated (E2E seed payé) ; PDF intake gated 402"
     },
     {
       "id": "S6.console",
@@ -172,6 +172,12 @@
     {
       "id": "P3.hardening",
       "scope": "Phase 3 : responsive/a11y/i18n base, .env.example exhaustif, Dockerfile+standalone+pm2 vérifiés, README 5min, purge code mort, audit DoD ligne par ligne",
+      "status": "pending",
+      "proof": ""
+    },
+    {
+      "id": "OP.deploy-coolify",
+      "scope": "Demande opérateur (chat 2026-07-05) : déployer sur Coolify en fin de mission (app + Postgres + env) — credentials hors repo",
       "status": "pending",
       "proof": ""
     },
