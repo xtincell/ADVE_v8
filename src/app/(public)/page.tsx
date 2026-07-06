@@ -73,7 +73,7 @@ export default async function LandingPage() {
                 href="/diagnostic"
                 className="group inline-flex items-center gap-3 rounded-full bg-accent py-2 pl-6 pr-2 font-medium text-accent-ink transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]"
               >
-                Obtenir mon diagnostic
+                Obtenir mon diagnostic gratuit
                 <span className="flex h-9 w-9 items-center justify-center rounded-full bg-black/15 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
                   <ArrowUpRight className="h-4 w-4" weight="bold" aria-hidden />
                 </span>
