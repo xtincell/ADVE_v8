@@ -54,7 +54,7 @@ export default async function LandingPage() {
         <div className="hero-aurora absolute inset-0" aria-hidden />
         <HeroBackground />
         <div className="hero-vignette absolute inset-0" aria-hidden />
-        <div className="relative mx-auto grid min-h-[86vh] max-w-[1400px] items-center gap-12 px-5 pt-20 pb-16 lg:grid-cols-12 lg:px-8">
+        <div className="relative mx-auto grid min-h-[86dvh] max-w-[1400px] items-center gap-12 px-5 pt-20 pb-16 lg:grid-cols-12 lg:px-8">
           <div className="lg:col-span-7">
             <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
               UPgraders présente
@@ -201,10 +201,10 @@ export default async function LandingPage() {
                 price: "0 FCFA", suffix: "" },
               { icon: Scroll, tag: "One-shot", featured: true, title: "L'Oracle, 35 sections",
                 desc: "Le rapport de stratégie complet : SWOT, plan d'activation, budget, KPIs, frameworks Big-4, exporté en PDF daté.",
-                price: oracle?.formatted ?? "—", suffix: "" },
+                price: oracle?.formatted, suffix: "" },
               { icon: SquaresFour, tag: "Abonnement", featured: false, title: "Le Cockpit",
                 desc: "Le pilotage continu : amendements, refresh stratégique, livrables, missions, intelligence communautaire.",
-                price: cockpit?.formatted ?? "—", suffix: " /mois" },
+                price: cockpit?.formatted, suffix: " /mois" },
             ].map((e, i) => (
               <Reveal key={e.title} delay={i * 90} className={e.featured ? "lg:-mt-4 lg:mb-4" : ""}>
                 <article
@@ -224,15 +224,15 @@ export default async function LandingPage() {
                   <h3 className="mt-1 font-display text-2xl font-semibold">{e.title}</h3>
                   <p className="mt-3 flex-1 text-ink-muted">{e.desc}</p>
                   <p className="mt-6 font-mono text-2xl font-bold tabular-nums">
-                    {e.price}
-                    {e.suffix && <span className="text-sm font-normal text-ink-muted">{e.suffix}</span>}
+                    {e.price ?? "sur demande"}
+                    {e.price && e.suffix ? <span className="text-sm font-normal text-ink-muted">{e.suffix}</span> : null}
                   </p>
                 </article>
               </Reveal>
             ))}
           </div>
           <p className="mt-6 text-sm text-ink-faint">
-            Rapport PDF léger dès {pdf?.formatted ?? "—"}. Prix affichés pour la zone UEMOA,{" "}
+            {pdf ? <>Rapport PDF léger dès {pdf.formatted}. </> : null}Prix affichés pour la zone UEMOA,{" "}
             <Link href="/tarifs" className="text-ink underline decoration-line-strong underline-offset-4 hover:decoration-accent">
               voir la grille complète
             </Link>.
@@ -243,24 +243,20 @@ export default async function LandingPage() {
       {/* ── PREUVE · une seule citation, en grand ──────────────────────────── */}
       <section className="border-t border-line py-24 lg:py-32">
         <div className="mx-auto max-w-[1400px] px-5 lg:px-8">
-          <Reveal className="grid gap-10 lg:grid-cols-12 lg:items-end">
-            <div className="lg:col-span-8">
-              <Badge variant="outline" className="mb-8">Univers de démonstration</Badge>
-              <blockquote className="font-display text-3xl font-medium leading-tight tracking-tight md:text-4xl">
-                « J&apos;ai enfin une réponse à &quot;où en est ma marque ?&quot; qui n&apos;est pas
-                une opinion. Le score bouge quand je travaille. »
-              </blockquote>
-              <div className="mt-8">
-                <p className="font-medium">Awa Cissé</p>
-                <p className="text-sm text-ink-muted">Fondatrice de Nyama Café, Dakar</p>
-              </div>
+          <Reveal className="mx-auto max-w-4xl">
+            <Badge variant="outline" className="mb-8">Univers de démonstration</Badge>
+            <blockquote className="font-display text-3xl font-medium leading-tight tracking-tight md:text-4xl">
+              « J&apos;ai enfin une réponse à &quot;où en est ma marque ?&quot; qui n&apos;est pas une
+              opinion. Le score bouge quand je travaille. »
+            </blockquote>
+            <div className="mt-8 flex flex-wrap items-baseline gap-x-3">
+              <p className="font-medium">Awa Cissé</p>
+              <p className="text-sm text-ink-muted">Fondatrice de Nyama Café, Dakar</p>
             </div>
-            <div className="lg:col-span-4">
-              <p className="text-ink-muted">
-                Nyama Café et sa guilde peuplent notre monde de démonstration, le même que celui des
-                comptes de test. Les verbatims clients réels prendront leur place ici.
-              </p>
-            </div>
+            <p className="mt-8 max-w-2xl border-l-2 border-line pl-4 text-sm text-ink-muted">
+              Nyama Café et sa guilde peuplent notre univers de démonstration, le même que celui des
+              comptes de test. Les verbatims clients réels prendront leur place ici.
+            </p>
           </Reveal>
         </div>
       </section>
@@ -276,7 +272,7 @@ export default async function LandingPage() {
             href="/diagnostic"
             className="group inline-flex items-center gap-3 rounded-full bg-accent py-2.5 pl-7 pr-2.5 text-lg font-medium text-accent-ink transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.98]"
           >
-            Lancer mon diagnostic gratuit
+            Obtenir mon diagnostic gratuit
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-black/15 transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
               <ArrowUpRight className="h-5 w-5" weight="bold" aria-hidden />
             </span>

@@ -24,7 +24,7 @@ export async function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Link href="/" aria-label="La Fusée — accueil">
+        <Link href="/" aria-label="La Fusée, accueil">
           <Logo withTagline />
         </Link>
         <nav aria-label="Navigation principale" className="hidden items-center gap-6 md:flex">
