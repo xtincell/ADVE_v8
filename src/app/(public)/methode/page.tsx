@@ -26,6 +26,17 @@ export default function MethodePage() {
         marque comme un système : un socle déclaré, une stratégie dérivée, une mesure continue.
       </p>
 
+      <div className="mt-10 overflow-hidden rounded-(--radius-md) border border-line shadow-sm">
+        <img
+          src="/images/methode-collab.webp"
+          alt="Équipe créative africaine collaborant autour de planches de marque et d'un nuancier"
+          width={1100}
+          height={738}
+          className="h-56 w-full object-cover md:h-80"
+          loading="lazy"
+        />
+      </div>
+
       <h2 className="mt-14 text-2xl font-semibold">1 · Le socle ADVE — ce que vous déclarez</h2>
       <p className="mt-2 max-w-2xl text-ink-muted">
         Quatre piliers fondateurs, remplis par vous (ou avec votre consultant). L&apos;écriture est

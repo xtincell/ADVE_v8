@@ -79,6 +79,32 @@ export default async function LandingPage() {
         </div>
       </section>
 
+      {/* ── Aperçu produit */}
+      <section className="border-b border-line">
+        <div className="mx-auto max-w-6xl px-4 py-14 md:py-16">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="font-mono text-xs uppercase tracking-widest text-accent">Le produit</p>
+            <h2 className="mt-3 text-2xl font-semibold md:text-3xl">
+              Votre diagnostic, en un coup d&apos;œil.
+            </h2>
+            <p className="mt-3 text-ink-muted">
+              Un score /200, vos quatre piliers et les signaux stratégiques — clairs, datés,
+              exportables. Voici ce que vous obtenez en 10 minutes.
+            </p>
+          </div>
+          <div className="mt-10 overflow-hidden rounded-(--radius-md) border border-line shadow-lg">
+            <img
+              src="/images/diagnostic-showcase.webp"
+              alt="Aperçu du diagnostic de marque La Fusée : score sur 200, les quatre piliers et l'analyse stratégique"
+              width={1600}
+              height={905}
+              className="w-full"
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* ── Méthode ADVE */}
       <section className="mx-auto max-w-6xl px-4 py-16 md:py-20">
         <div className="max-w-2xl">
