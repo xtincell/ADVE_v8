@@ -8,6 +8,7 @@ const NAV: NavItem[] = [
   { href: "/cockpit/marque", label: "Ma marque" },
   { href: "/cockpit/livrables", label: "Livrables" },
   { href: "/cockpit/abonnement", label: "Abonnement" },
+  { href: "/cockpit/reglages", label: "Réglages" },
 ];
 
 export default async function CockpitLayout({ children }: { children: React.ReactNode }) {

@@ -2,7 +2,10 @@ import "server-only";
 import type { PlanTier, Prisma } from "@prisma/client";
 import { db } from "@/server/db";
 import { audit } from "@/server/audit";
+import { env } from "@/env";
 import { getSetting } from "@/server/settings";
+import { notify } from "@/server/notifications";
+import { sendEmail } from "@/server/notifications/email";
 
 // Règlement d'un paiement confirmé — LE point de bascule des droits.
 // Idempotent (un paiement déjà SUCCEEDED ne rejoue rien). Un paiement n'arrive
@@ -86,18 +89,6 @@ export async function settlePayment(input: SettleInput): Promise<{ alreadySettle
       },
     });
 
-    if (payment.userId) {
-      await tx.notification.create({
-        data: {
-          userId: payment.userId,
-          type: payment.subscriptionId || (payment.tier && RECURRING_TIERS.includes(payment.tier)) ? "SUBSCRIPTION_ACTIVATED" : "PAYMENT_RECEIVED",
-          title: "Paiement confirmé",
-          body: `Votre paiement ${payment.tier ?? ""} est confirmé — facture ${number}.`,
-          href: "/cockpit/abonnement",
-        },
-      });
-    }
-
     await audit(
       {
         operatorId: payment.operatorId,
@@ -111,6 +102,31 @@ export async function settlePayment(input: SettleInput): Promise<{ alreadySettle
       tx,
     );
   });
+
+  // Notification temps réel + email — après commit (le droit est acquis).
+  if (payment.userId) {
+    const [user, invoice] = await Promise.all([
+      db.user.findUnique({ where: { id: payment.userId } }),
+      db.invoice.findUnique({ where: { paymentId: payment.id } }),
+    ]);
+    const recurring = !!payment.subscriptionId || (payment.tier != null && RECURRING_TIERS.includes(payment.tier));
+    await notify({
+      userId: payment.userId,
+      type: recurring ? "SUBSCRIPTION_ACTIVATED" : "PAYMENT_RECEIVED",
+      title: "Paiement confirmé",
+      body: `Votre paiement ${payment.tier ?? ""} est confirmé${invoice ? ` — facture ${invoice.number}` : ""}.`,
+      href: "/cockpit/abonnement",
+    });
+    if (user) {
+      await sendEmail(payment.operatorId, "paiement_confirme", user.email, {
+        name: user.name ?? "",
+        tier: payment.tier ?? "paiement",
+        amount: `${payment.amount} ${payment.currency}`,
+        invoice: invoice?.number ?? "—",
+        url: env().NEXT_PUBLIC_BASE_URL,
+      });
+    }
+  }
 
   return { alreadySettled: false };
 }

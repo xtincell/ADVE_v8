@@ -4,7 +4,10 @@ import { hash } from "bcryptjs";
 import { z } from "zod";
 import { db } from "@/server/db";
 import { audit } from "@/server/audit";
+import { env } from "@/env";
 import { getCommissionRates } from "@/server/settings";
+import { notify } from "@/server/notifications";
+import { sendEmail } from "@/server/notifications/email";
 
 // La Guilde (cahier §4.4) : dépôt public modéré, inscriptions talents/agences,
 // candidatures avec devis structurés, décision opérateur (jamais premier-arrivé),
@@ -217,6 +220,21 @@ export async function moderateMission(
     before: { status: mission.status },
     after: { status: updated.status, reason: reason ?? null },
   });
+  // Le déposant (souvent sans compte) est informé par email — cascade DEFERRED sans clé.
+  if (actor.operatorId) {
+    await sendEmail(
+      actor.operatorId,
+      decision === "publish" ? "mission_publiee" : "mission_rejetee",
+      mission.contactEmail,
+      {
+        name: mission.contactName,
+        title: mission.title,
+        slug: mission.slug,
+        reason: reason ?? "Non conforme aux critères de publication",
+        url: env().NEXT_PUBLIC_BASE_URL,
+      },
+    );
+  }
   return updated;
 }
 
@@ -307,21 +325,6 @@ export async function decideApplication(
       }
     }
 
-    await tx.notification.create({
-      data: {
-        userId: application.talentId,
-        type: "APPLICATION_DECIDED",
-        title:
-          decision === "ACCEPTED"
-            ? "Candidature retenue 🎉"
-            : decision === "SHORTLISTED"
-              ? "Vous êtes en présélection"
-              : "Candidature non retenue",
-        body: `Mission « ${application.mission.title} »`,
-        href: "/creator",
-      },
-    });
-
     await audit(
       {
         operatorId: actor.operatorId,
@@ -336,4 +339,23 @@ export async function decideApplication(
       tx,
     );
   });
+
+  // Temps réel + email après commit.
+  const decisionLabel =
+    decision === "ACCEPTED" ? "Candidature retenue 🎉" : decision === "SHORTLISTED" ? "Vous êtes en présélection" : "Candidature non retenue";
+  await notify({
+    userId: application.talentId,
+    type: "APPLICATION_DECIDED",
+    title: decisionLabel,
+    body: `Mission « ${application.mission.title} »`,
+    href: "/creator",
+  });
+  if (actor.operatorId) {
+    await sendEmail(actor.operatorId, "candidature_decidee", application.talent.email, {
+      name: application.talent.name ?? "",
+      title: application.mission.title,
+      decision: decisionLabel,
+      url: env().NEXT_PUBLIC_BASE_URL,
+    });
+  }
 }

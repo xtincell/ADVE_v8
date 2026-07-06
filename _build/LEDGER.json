@@ -130,8 +130,8 @@
     {
       "id": "S8.notifications",
       "scope": "§13.8 SSE unique (heartbeat, ?since=) + push VAPID opt-in + email cascade Resend→Mailgun→SendGrid + digest hebdo + crons HTTP CRON_SECRET",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "SSE unique /api/sse (heartbeat 25s, ?since= rejoué depuis la DB, X-Accel-Buffering:no) + cloche temps réel — E2E 2 contextes : validation ops → badge cliente sans reload. Email cascade Resend→Mailgun→SendGrid (vault, DEFERRED tracé — digest sent:2 vérifié). Digest hebdo + expiration abonnements + signaux en crons HTTP CRON_SECRET fail-closed (E2E 401/503). Push VAPID opt-in (sw.js, /api/push/subscribe, prefs Réglages). RGPD export JSON + suppression anonymisée."
     },
     {
       "id": "S9.intelligence",

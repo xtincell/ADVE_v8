@@ -282,6 +282,7 @@ model User {
   phone         String?
   mfaSecret     String? // chiffré (vault)
   mfaEnabled    Boolean   @default(false)
+  digestOptOut  Boolean   @default(false)
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt

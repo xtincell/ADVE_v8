@@ -1,14 +1,16 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/notification-bell";
 import { signOutAction } from "@/app/(public)/(auth)/actions";
 import type { SessionUser } from "@/server/auth/guards";
+import { db } from "@/server/db";
 import { AppNav, type NavItem } from "./app-nav";
 
 // Shell des surfaces connectées (Cockpit, Console, Creator, Agency) :
-// topbar + navigation latérale (drawer en mobile via AppNav).
+// topbar + cloche temps réel + navigation latérale (drawer en mobile via AppNav).
 
-export function AppShell({
+export async function AppShell({
   user,
   surface,
   nav,
@@ -19,6 +21,14 @@ export function AppShell({
   nav: NavItem[];
   children: React.ReactNode;
 }) {
+  const [latest, unreadCount] = await Promise.all([
+    db.notification.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      take: 10,
+    }),
+    db.notification.count({ where: { userId: user.id, readAt: null } }),
+  ]);
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-40 border-b border-line bg-surface/95 backdrop-blur">
@@ -32,6 +42,17 @@ export function AppShell({
             </span>
           </div>
           <div className="flex items-center gap-1">
+            <NotificationBell
+              initial={latest.map((n) => ({
+                id: n.id,
+                title: n.title,
+                body: n.body,
+                href: n.href,
+                createdAt: n.createdAt.toISOString(),
+                read: n.readAt !== null,
+              }))}
+              initialUnread={unreadCount}
+            />
             <ThemeToggle />
             <details className="relative">
               <summary className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-(--radius-sm) px-2 text-sm hover:bg-surface-sunken [&::-webkit-details-marker]:hidden">

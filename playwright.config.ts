@@ -22,8 +22,10 @@ export default defineConfig({
     { name: "mobile", use: { ...devices["Pixel 7"] }, grep: /@mobile/ },
   ],
   webServer: {
-    // CI : sert l'artefact standalone réel (output: standalone) — valide l'artefact au passage.
-    command: process.env.CI ? "node .next/standalone/server.js" : "npm run dev",
+    // CI et runs complets locaux (PW_PROD=1) : l'artefact standalone réel est servi —
+    // déterministe (zéro recompilation en vol) et valide l'artefact au passage.
+    // Itération locale : le dev server (réutilisé s'il tourne déjà).
+    command: process.env.CI || process.env.PW_PROD ? "node .next/standalone/server.js" : "npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,
