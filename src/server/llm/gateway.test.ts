@@ -20,6 +20,7 @@ async function loadGateway(extraEnv: Record<string, string | undefined>) {
   for (const key of [
     "ANTHROPIC_API_KEY",
     "OPENAI_API_KEY",
+    "OPENAI_BASE_URL",
     "OLLAMA_BASE_URL",
     "OPENROUTER_API_KEY",
     "LLM_PRIMARY_PROVIDER",
@@ -72,6 +73,31 @@ describe("Gateway LLM (cahier §9)", () => {
     expect(out).toEqual({ titre: "Depuis OpenAI" });
     expect(calls[0]).toContain("api.anthropic.com");
     expect(calls[1]).toContain("api.openai.com");
+  });
+
+  it("OPENAI_BASE_URL : le provider openai vise un endpoint compatible (ex. Ollama Cloud)", async () => {
+    const g = await loadGateway({
+      OPENAI_API_KEY: "k-cloud",
+      OPENAI_BASE_URL: "https://ollama.com/v1",
+      LLM_MODEL: "deepseek-v4-flash",
+    });
+    let seenUrl = "";
+    let seenAuth = "";
+    let seenModel = "";
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async (url: string, init?: RequestInit) => {
+        seenUrl = String(url);
+        seenAuth = String((init?.headers as Record<string, string>)?.authorization ?? "");
+        seenModel = JSON.parse(String(init?.body ?? "{}")).model as string;
+        return jsonResponse(openaiBody(JSON.stringify({ titre: "Depuis Ollama Cloud" })));
+      }),
+    );
+    const out = await g.callLlm({ purpose: "test", system: "s", prompt: "p", schema });
+    expect(out).toEqual({ titre: "Depuis Ollama Cloud" });
+    expect(seenUrl).toBe("https://ollama.com/v1/chat/completions");
+    expect(seenAuth).toBe("Bearer k-cloud");
+    expect(seenModel).toBe("deepseek-v4-flash");
   });
 
   it("LLM_PRIMARY_PROVIDER réordonne la chaîne", async () => {

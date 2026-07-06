@@ -128,10 +128,13 @@ async function completeWith(
     };
   }
 
-  // OpenAI et OpenRouter partagent le format chat/completions.
+  // OpenAI et OpenRouter partagent le format chat/completions. La base OpenAI
+  // est configurable (OPENAI_BASE_URL) pour viser n'importe quel endpoint
+  // compatible : Ollama Cloud (https://ollama.com/v1), Together, Groq, vLLM local…
+  const openaiBase = (e.OPENAI_BASE_URL ?? "https://api.openai.com/v1").replace(/\/$/, "");
   const url =
     provider === "openai"
-      ? "https://api.openai.com/v1/chat/completions"
+      ? `${openaiBase}/chat/completions`
       : "https://openrouter.ai/api/v1/chat/completions";
   const key = provider === "openai" ? e.OPENAI_API_KEY! : e.OPENROUTER_API_KEY!;
   const res = await fetch(url, {
