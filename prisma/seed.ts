@@ -182,6 +182,21 @@ async function seedUsers(operatorId: string) {
     },
   });
 
+  // Founder sans aucun abonnement ni paiement : montre les gates premium fermés (démo/E2E).
+  const freeClient = await db.user.upsert({
+    where: { email: "gratuit@demo.test" },
+    update: {},
+    create: {
+      email: "gratuit@demo.test",
+      name: "Fodé Camara",
+      passwordHash: demoHash,
+      roles: ["FOUNDER"],
+      operatorId,
+      country: "SN",
+      emailVerified: new Date(),
+    },
+  });
+
   // Opérateur (rôle OPERATOR sans ADMIN) : accès Console sans exigence MFA — utile en démo/E2E.
   const ops = await db.user.upsert({
     where: { email: "ops@demo.test" },
@@ -197,7 +212,7 @@ async function seedUsers(operatorId: string) {
     },
   });
 
-  return { admin, founder, talent, agency, pendingClient, ops };
+  return { admin, founder, talent, agency, pendingClient, freeClient, ops };
 }
 
 async function seedBrandFromCanon(

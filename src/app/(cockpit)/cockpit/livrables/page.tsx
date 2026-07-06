@@ -8,7 +8,11 @@ import { getOwnedBrand } from "@/server/brands/queries";
 import { checkOneShotGate } from "@/server/billing/gates";
 import { db } from "@/server/db";
 import { TIER_LABELS } from "@/server/scoring/score";
-import { generateOracleAction } from "./actions";
+import { EXPOSED_KINDS } from "@/server/assets/composers";
+import { activateAssetAction, archiveAssetAction, generateOracleAction } from "./actions";
+import { ForgeForm } from "./forge-form";
+
+const KIND_LABELS = Object.fromEntries(EXPOSED_KINDS.map((k) => [k.kind, k.label]));
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +35,12 @@ export default async function LivrablesPage() {
   });
   const stalePillars = await db.pillar.count({ where: { brandId: brand.id, stale: true } });
   const oracleGate = await checkOneShotGate(user, "ORACLE_FULL", { brandId: brand.id });
+  const assets = await db.brandAsset.findMany({
+    where: { brandId: brand.id, kind: { in: EXPOSED_KINDS.map((k) => k.kind) } },
+    orderBy: { createdAt: "desc" },
+  });
+  const vault = assets.filter((a) => a.status !== "ARCHIVED");
+  const archivedCount = assets.length - vault.length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -126,6 +136,78 @@ export default async function LivrablesPage() {
           </CardContent>
         </Card>
       )}
+
+      <section className="mt-4 flex flex-col gap-4" aria-labelledby="forge-title">
+        <div>
+          <h2 id="forge-title" className="text-2xl font-semibold">Forge &amp; vault d&apos;assets</h2>
+          <p className="mt-1 max-w-xl text-sm text-ink-muted">
+            Vos livrables de marque (positionnement, manifeste, pitch…) composés depuis le socle
+            déclaré. Cycle de vie : brouillon → actif → remplacé ; un asset actif se périme quand
+            l&apos;ADVE bouge.
+          </p>
+        </div>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Forger un livrable</CardTitle>
+            <CardDescription>Chaque forge crée une nouvelle version en brouillon dans le vault.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ForgeForm brandId={brand.id} kinds={EXPOSED_KINDS} />
+          </CardContent>
+        </Card>
+
+        {vault.length === 0 ? (
+          <EmptyState
+            title="Vault vide"
+            description="Forgez votre premier asset : il n'utilisera que ce que votre marque a déclaré."
+          />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Vault ({vault.length})</CardTitle>
+              {archivedCount > 0 && (
+                <CardDescription>{archivedCount} asset{archivedCount > 1 ? "s" : ""} archivé{archivedCount > 1 ? "s" : ""} non affiché{archivedCount > 1 ? "s" : ""}.</CardDescription>
+              )}
+            </CardHeader>
+            <CardContent>
+              <ul className="divide-y divide-line">
+                {vault.map((a) => (
+                  <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <div className="min-w-0">
+                      <Link href={`/cockpit/livrables/asset/${a.id}`} className="font-medium hover:text-accent">
+                        {a.title}
+                      </Link>
+                      <p className="font-mono text-xs text-ink-faint">
+                        {KIND_LABELS[a.kind] ?? a.kind} · v{a.version} ·{" "}
+                        {new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(a.createdAt)}
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {a.staleAt && <Badge variant="gold">Périmé</Badge>}
+                      {a.status === "ACTIVE" && <Badge variant="accent">Actif</Badge>}
+                      {a.status === "DRAFT" && <Badge variant="outline">Brouillon</Badge>}
+                      {a.status === "SUPERSEDED" && <Badge variant="neutral">Remplacé</Badge>}
+                      {a.status === "DRAFT" && (
+                        <form action={activateAssetAction}>
+                          <input type="hidden" name="id" value={a.id} />
+                          <Button type="submit" size="sm" variant="outline">Activer</Button>
+                        </form>
+                      )}
+                      <form action={archiveAssetAction}>
+                        <input type="hidden" name="id" value={a.id} />
+                        <Button type="submit" size="sm" variant="ghost" aria-label={`Archiver ${a.title}`}>
+                          Archiver
+                        </Button>
+                      </form>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </CardContent>
+          </Card>
+        )}
+      </section>
     </div>
   );
 }

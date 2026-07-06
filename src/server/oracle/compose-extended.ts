@@ -1,4 +1,5 @@
 import { callout, empty, kv, list, p, score, table, type SectionContent } from "./blocks";
+import { cultIndex, superfanCount, type Devotion } from "@/server/intelligence/measures";
 import {
   devotionDistribution,
   has,
@@ -217,18 +218,15 @@ export function s30_budget_framework(ctx: OracleContext): SectionContent {
 }
 
 export function s31_cult_index(ctx: OracleContext): SectionContent {
-  const dist = devotionDistribution(ctx);
-  const total = Object.values(dist).reduce((a, b) => a + b, 0);
-  const sf = (dist.AMBASSADEUR ?? 0) + (dist.EVANGELISTE ?? 0);
+  const dist = devotionDistribution(ctx) as Devotion;
+  const cult = cultIndex(dist);
+  const sf = superfanCount(dist);
   const blocks = [];
-  if (total > 0) {
-    // Cult Index paramétrique : profondeur de dévotion pondérée (0–100), données réelles uniquement.
-    const weights: Record<string, number> = { SPECTATEUR: 0, INTERESSE: 10, PARTICIPANT: 30, ENGAGE: 55, AMBASSADEUR: 80, EVANGELISTE: 100 };
-    const index = Math.round(Object.entries(dist).reduce((sum, [lvl, n]) => sum + (weights[lvl] ?? 0) * n, 0) / total);
+  if (cult) {
     blocks.push(
-      score("Cult Index (profondeur de dévotion moyenne)", index, 100),
-      p(`Calculé sur ${total} membre${total > 1 ? "s" : ""} recensé${total > 1 ? "s" : ""}, dont ${sf} superfan${sf > 1 ? "s" : ""}. Formule fixe : moyenne pondérée des échelons (Spectateur 0 → Évangéliste 100).`),
-      callout(total < 20 ? "Échantillon inférieur à 20 membres : l'index est indicatif — poursuivez le recensement." : "Index historisé à chaque snapshot — la trajectoire compte plus que le niveau.", total < 20 ? "warning" : "info"),
+      score("Cult Index (profondeur de dévotion moyenne)", cult.value, 100),
+      p(`Calculé sur ${cult.sample} membre${cult.sample > 1 ? "s" : ""} recensé${cult.sample > 1 ? "s" : ""}, dont ${sf} superfan${sf > 1 ? "s" : ""}. Formule fixe : moyenne pondérée des échelons (Spectateur 0 → Évangéliste 100).`),
+      callout(cult.sample < 20 ? "Échantillon inférieur à 20 membres : l'index est indicatif — poursuivez le recensement." : "Index historisé à chaque snapshot — la trajectoire compte plus que le niveau.", cult.sample < 20 ? "warning" : "info"),
     );
   } else {
     blocks.push(empty(INSUFFISANT, "Aucun membre de communauté recensé — le Cult Index n'est jamais fabriqué. Recensez dans Cockpit → Intelligence."));

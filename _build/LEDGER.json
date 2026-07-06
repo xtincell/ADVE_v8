@@ -136,14 +136,14 @@
     {
       "id": "S9.intelligence",
       "scope": "§13.9 Snapshots + feeds réels (World Bank, RSS Google News) + Devotion Ladder + Cult Index + radar Overton heuristique (DEGRADED/INSUFFICIENT_DATA) + journal coûts LLM",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "measures.ts pur (cultIndex pondéré null-honnête, devotion, radar 4 axes OK/DEGRADED/INSUFFICIENT_DATA avec basis) partagé Oracle s31 (implémentation unique) — 9 tests unitaires. /cockpit/intelligence gated abonnement (TIER_GATE_DENIED + upgrade path — E2E), recensement manual-first (chaque mutation → BrandSnapshot cultIndex/devotion/followers), sparkline trajectoire, veille RSS/World Bank (cron signals) + saisie terrain (E2E). Journal coûts LLM (LlmCall) arrive avec X.llm (table prête)."
     },
     {
       "id": "S9.assets",
       "scope": "§13.9 Vault d'assets + forge de base (kinds v1, déterministe d'abord, LLM optionnel, lifecycle+staleAt)",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "Forge déterministe composers.ts : 6 kinds réellement exposés UI (POSITIONING/MANIFESTO/CLAIM/PITCH/PERSONA/CREATIVE_BRIEF+objectif), interface unique forgeAsset (sortie validée Zod), trous explicites [À compléter] jamais inventés (tests unitaires + E2E). Vault /cockpit/livrables : lifecycle DRAFT→ACTIVE→SUPERSEDED/ARCHIVED, staleAt posé par amendPillar (E2E : forge → activation → amendement ADVE → Périmé), détail asset + édition manuelle (manual-first, E2E), reforge, audit. Amélioration LLM = X.llm."
     },
     {
       "id": "S10.creator",
