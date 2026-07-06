@@ -152,10 +152,14 @@ export const MCP_TOOLS: McpToolDef[] = [
       },
       additionalProperties: false,
     },
-    run: async (_user, args) => {
+    run: async (user, args) => {
       const { skill } = z.object({ skill: z.string().optional() }).parse(args ?? {});
       const missions = await db.mission.findMany({
-        where: { status: "PUBLISHED", ...(skill ? { skills: { has: skill } } : {}) },
+        where: {
+          status: "PUBLISHED",
+          operatorId: user.operatorId ?? "__none__",
+          ...(skill ? { skills: { has: skill } } : {}),
+        },
         orderBy: { publishedAt: "desc" },
         take: 50,
       });
@@ -172,6 +176,8 @@ export const MCP_TOOLS: McpToolDef[] = [
           skills: m.skills,
           deadline: m.deadline,
           publishedAt: m.publishedAt,
+          // Honest-empty jusque dans l'API : une mission du monde de démo se déclare.
+          isDemo: m.isDemo,
         })),
       };
     },

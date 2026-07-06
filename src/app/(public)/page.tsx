@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { buttonClass } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScoreDial } from "@/components/public/score-dial";
@@ -165,9 +166,16 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── Témoignages (univers de démonstration) */}
+      {/* ── Témoignages — univers de démonstration, étiqueté comme tel (honest-empty) */}
       <section className="mx-auto max-w-6xl px-4 py-16">
-        <h2 className="text-3xl font-semibold">Ils pilotent déjà leur marque.</h2>
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 className="text-3xl font-semibold">À quoi ça ressemble, piloté.</h2>
+          <Badge variant="outline">Univers de démonstration</Badge>
+        </div>
+        <p className="mt-2 max-w-2xl text-sm text-ink-muted">
+          Nyama Café et sa guilde sont les personnages de notre monde de démonstration — le même
+          que celui des comptes de test. Les verbatims clients réels prendront leur place ici.
+        </p>
         <div className="mt-8 grid gap-6 md:grid-cols-2">
           <Card>
             <CardContent className="pt-5">
@@ -177,7 +185,7 @@ export default async function LandingPage() {
                 accro. »
               </p>
               <p className="mt-4 text-sm font-medium">Awa Cissé</p>
-              <p className="text-xs text-ink-muted">Fondatrice, Nyama Café — Dakar</p>
+              <p className="text-xs text-ink-muted">Fondatrice, Nyama Café (démo) — Dakar</p>
             </CardContent>
           </Card>
           <Card>
@@ -188,7 +196,7 @@ export default async function LandingPage() {
                 vide. »
               </p>
               <p className="mt-4 text-sm font-medium">Moussa Diop</p>
-              <p className="text-xs text-ink-muted">Directeur artistique, membre de La Guilde</p>
+              <p className="text-xs text-ink-muted">Directeur artistique, membre de La Guilde (démo)</p>
             </CardContent>
           </Card>
         </div>
