@@ -74,7 +74,42 @@ Méthode : chaque ligne du périmètre est vérifiée **par exécution** (test, 
 
 ## 8. Constats des revues à contexte frais (et corrections)
 
-_(rempli après retour des trois auditeurs)_
+Trois revues à contexte frais ont attaqué la conformité (anti-patterns/budgets, doctrines, sécurité défensive). Chaque constat réel a été corrigé ou explicitement assumé.
+
+### 8.1 Sécurité (revue défensive)
+
+| Sév. | Constat | Correction |
+|---|---|---|
+| **CRITIQUE** | Orange Money réglé sur le statut auto-déclaré du callback ; `notifToken`/`payToken` exposés par l'export RGPD (`payment.metadata`) → un utilisateur pouvait rejouer le webhook et s'ouvrir des droits sans transfert | **Corrigé** : `orangeCheckStatus()` relit le statut serveur→serveur chez Orange (`/transactionstatus` + `payToken`) avant `settlePayment` — comme Wave/MoMo/CinetPay/PayPal ; l'export RGPD ne renvoie plus que les faits de paiement (`select` explicite : id/tier/provider/amount/currency/status/date), jamais `metadata`/`providerRef`/`idempotencyKey` |
+| **HAUTE** | `GOD_MODE_EMAILS` a un défaut de 4 emails ; l'inscription credentials ne vérifie pas la propriété de l'email → un inconnu pouvait s'inscrire avec un email god-mode non revendiqué et devenir ADMIN | **Corrigé** : l'élévation god-mode n'est appliquée que si `emailVerified` est présent (seed / OAuth le posent ; l'inscription credentials, non). Le token JWT porte `emailVerified` ; `.env.example` documente la règle |
+| MOYENNE | OPERATOR atteint la Console sans MFA | **Assumé** : conforme à §11.2 (MFA mandatée pour ADMIN uniquement) ; `ops@demo.test` est volontairement OPERATOR-sans-MFA pour la démo/E2E. Extension à OPERATOR notée comme durcissement optionnel post-v2.0 |
+| MOYENNE | Rate limiting absent | **Assumé/documenté** : v2.0 mono-instance derrière reverse proxy — le throttle se pose au niveau proxy (§9 réserves) ; pas de limiteur applicatif en v2.0 |
+| BASSE | Comparaison `CRON_SECRET` non constante | **Corrigé** : `timingSafeEqual` sur buffers de longueur égale |
+| BASSE | `upsert` push réassigne la propriété sur collision d'endpoint | **Assumé** : endpoint opaque non devinable, impact négligeable |
+
+Points explicitement **OK** relevés par la revue : contrôle d'accès + propriété sur toutes les mutations ; signature Stripe sur corps brut ; idempotence WebhookEvent réclamée avant traitement ; MOCK verrouillé hors prod ; vault ne fuite jamais un secret déchiffré ; clés MCP hashées ; aucun `console.log` de secret ; aucun `$queryRawUnsafe` ; open-redirect fermé (`safeNext`) ; aucun `fetch` d'URL utilisateur ; SSE et MCP scopés au porteur.
+
+### 8.2 Anti-patterns / budgets
+
+| Sév. | Constat | Correction |
+|---|---|---|
+| HAUTE | Table `Dispute` sans surface (§4.3 litiges promis) | **Corrigé** : panneau « Litiges & escrow » sur `/console/argent` (ouverture + arbitrage manuel motivé + audit), E2E |
+| HAUTE | Table `BrandRequest` sans chemin (§4.2 demandes à l'opérateur) | **Corrigé** : `/cockpit/operations` (demande founder) → file `/console/marques` → réponse notifiée, E2E aller-retour complet |
+| MOYENNE | Table `BrandAction` lue mais jamais écrite (§4.2 roadmap) | **Corrigé** : formulaire d'action + transitions de statut sur `/cockpit/operations`, E2E |
+| BASSE | Table `EmailLog` write-only (§4.3 envois) | **Corrigé** : carte « Envois d'emails » sur `/console/argent` |
+| MOYENNE | Mot de passe admin en dur dans le seed | **Corrigé** : `SEED_ADMIN_PASSWORD` requis en production (sinon aléatoire imprimé une fois) ; défaut conservé en dev seulement, documenté |
+| BASSE | `PAYMENT_MOCK_ENABLED`/`NEXT_PUBLIC_BASE_URL` lus hors `env.ts` | **Assumé** : `NEXT_PUBLIC_*` est exposé au bundle par Next (accès direct normal) ; le flag mock a son verrou anti-prod réel |
+
+Budgets §14 tous tenus (mesurés par la revue : 38 tables, 64 routes, 20 modules, 1 PDF / 1 Oracle / 1 SSE / 1 MCP). Zéro bus d'intents, zéro hash-chain, zéro nommage mythologique, point d'écriture ADVE unique confirmé.
+
+### 8.3 Doctrines
+
+Moteur conforme sur les trois axes (honest-empty, manual-first, LLM-optionnel), verrous testés. Deux constats de présentation corrigés :
+
+| Sév. | Constat | Correction |
+|---|---|---|
+| MOYENNE | Témoignages de personas démo présentés comme clients réels (landing) | **Corrigé** : badge visible « Univers de démonstration » + mention « (démo) » sur chaque attribution + phrase d'explication |
+| BASSE | Tool MCP `list_missions` sans marqueur `isDemo` | **Corrigé** : `isDemo` exposé dans le payload + scoping `operatorId` ajouté |
 
 ## 9. Réserves honnêtes
 

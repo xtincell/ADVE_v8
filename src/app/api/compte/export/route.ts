@@ -20,8 +20,16 @@ export async function GET() {
         include: { pillars: true, snapshots: { take: 50, orderBy: { createdAt: "desc" } }, sources: true, actions: true },
       }),
       db.notification.findMany({ where: { userId: user.id }, orderBy: { createdAt: "desc" } }),
-      db.payment.findMany({ where: { userId: user.id } }),
-      db.subscription.findMany({ where: { userId: user.id } }),
+      // Faits de paiement uniquement — jamais les jetons de flux provider (metadata,
+      // providerRef, idempotencyKey) qui pourraient rejouer un webhook (règle d'or §6).
+      db.payment.findMany({
+        where: { userId: user.id },
+        select: { id: true, tier: true, provider: true, amount: true, currency: true, status: true, createdAt: true },
+      }),
+      db.subscription.findMany({
+        where: { userId: user.id },
+        select: { id: true, tier: true, status: true, provider: true, currentPeriodEnd: true, createdAt: true },
+      }),
       db.missionApplication.findMany({ where: { talentId: user.id } }),
       db.talentProfile.findUnique({ where: { userId: user.id } }),
       db.agencyProfile.findUnique({ where: { userId: user.id } }),

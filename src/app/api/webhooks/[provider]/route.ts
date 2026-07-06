@@ -6,7 +6,7 @@ import { db } from "@/server/db";
 import { env } from "@/env";
 import { stripeClient } from "@/server/payments/stripe";
 import { settlePayment } from "@/server/payments/settle";
-import { cinetpayCheck, momoCheckStatus, waveCheckSession } from "@/server/payments/mobile-money";
+import { cinetpayCheck, momoCheckStatus, orangeCheckStatus, waveCheckSession } from "@/server/payments/mobile-money";
 import { getProviderCredentials } from "@/server/vault";
 
 // Webhooks de paiement (cahier §6.1) : endpoints dédiés par provider,
@@ -164,9 +164,16 @@ async function handleOrange(req: Request): Promise<NextResponse> {
   if (!payment) return NextResponse.json({ received: true, ignored: true });
   const eventId = `om-${payload.notif_token}`;
   if (!(await claimEvent("ORANGE_MONEY", eventId))) return NextResponse.json({ received: true, duplicate: true });
-  const ok = payload.status === "SUCCESS";
-  if (ok) await settlePayment({ paymentId: payment.id, providerRef: payload.txnid });
-  await markProcessed("ORANGE_MONEY", eventId, ok ? undefined : `statut ${payload.status}`);
+  // Règle d'or §6 : on ne se fie JAMAIS au statut auto-déclaré du callback.
+  // Relecture serveur→serveur du statut chez Orange (payToken stocké) avant tout règlement.
+  const meta = (payment.metadata ?? {}) as { payToken?: string | null };
+  const confirmed = await orangeCheckStatus(payment.operatorId, {
+    orderId: payment.id,
+    amount: payment.amount,
+    payToken: meta.payToken ?? null,
+  });
+  if (confirmed) await settlePayment({ paymentId: payment.id, providerRef: payload.txnid });
+  await markProcessed("ORANGE_MONEY", eventId, confirmed ? undefined : `statut re-vérifié non confirmé (callback: ${payload.status})`);
   return NextResponse.json({ received: true });
 }
 

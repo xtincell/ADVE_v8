@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
 import { requireAdminWithMfa } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { getDefaultOperator } from "@/server/tenancy";
 import { TIER_LABELS } from "@/server/scoring/score";
+import { RequestQueue } from "./request-queue";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,12 @@ export default async function ConsoleMarquesPage() {
     orderBy: { updatedAt: "desc" },
     take: 20,
   });
+  const openRequests = await db.brandRequest.findMany({
+    where: { brand: { operatorId: operator.id }, status: "OPEN" },
+    orderBy: { createdAt: "asc" },
+    include: { brand: { select: { name: true } }, author: { select: { email: true } } },
+  });
+  const dateFmt = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 
   return (
     <div className="flex flex-col gap-6">
@@ -33,6 +40,31 @@ export default async function ConsoleMarquesPage() {
         <p className="font-mono text-xs uppercase tracking-widest text-ink-faint">Console · Portefeuille</p>
         <h1 className="mt-1 text-3xl font-semibold">Marques ({brands.length})</h1>
       </div>
+
+      <Card className={openRequests.length > 0 ? "border-gold" : undefined}>
+        <CardHeader>
+          <CardTitle>Demandes founders ({openRequests.length})</CardTitle>
+          <CardDescription>
+            Les demandes envoyées depuis le Cockpit (Opérations) — votre réponse est notifiée au founder.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {openRequests.length === 0 ? (
+            <EmptyState title="Aucune demande ouverte" description="Les demandes founders arrivent ici." />
+          ) : (
+            <RequestQueue
+              requests={openRequests.map((r) => ({
+                id: r.id,
+                brandName: r.brand.name,
+                authorEmail: r.author.email,
+                subject: r.subject,
+                message: r.message,
+                createdAt: dateFmt.format(r.createdAt),
+              }))}
+            />
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

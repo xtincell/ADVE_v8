@@ -2,6 +2,7 @@
 // pays/zones + grille tarifaire, jeu de démo complet — aucun écran vide à la première visite.
 // Relançable sans dupliquer : `npm run db:seed`.
 
+import { randomBytes } from "node:crypto";
 import { PrismaClient, type PillarKind, type Prisma } from "@prisma/client";
 import { hash } from "bcryptjs";
 import { amendPillar } from "../src/server/brands/amend";
@@ -11,7 +12,19 @@ import { DEMO_BRAND, DEMO_INFERRED, LAFUSEE_CANON, UPGRADERS_CANON, type CanonBr
 const db = new PrismaClient();
 
 const ADMIN_EMAIL = "xtincell@gmail.com";
-const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "Fusee!2026-admin";
+// Mot de passe admin god-mode : jamais de secret en dur en production (§11.1).
+// Hors dev, SEED_ADMIN_PASSWORD est requis ; à défaut, un secret aléatoire est
+// généré et imprimé UNE fois (aucun défaut connu ne survit en prod).
+const ADMIN_PASSWORD = (() => {
+  const fromEnv = process.env.SEED_ADMIN_PASSWORD;
+  if (fromEnv) return fromEnv;
+  if (process.env.NODE_ENV === "production") {
+    const generated = randomBytes(18).toString("base64url");
+    console.log(`\n⚠️  SEED_ADMIN_PASSWORD non défini — mot de passe admin généré (à noter maintenant) : ${generated}\n`);
+    return generated;
+  }
+  return "Fusee!2026-admin"; // dev/démo uniquement — documenté dans le README
+})();
 const DEMO_PASSWORD = "demo1234";
 
 // ─────────────────────────────────────────────── Référentiels

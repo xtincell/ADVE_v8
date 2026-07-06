@@ -28,5 +28,6 @@ declare module "@auth/core/jwt" {
     operatorId?: string | null;
     godMode?: boolean;
     mfaEnabled?: boolean;
+    emailVerified?: boolean;
   }
 }

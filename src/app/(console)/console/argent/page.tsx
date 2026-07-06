@@ -8,6 +8,7 @@ import { db } from "@/server/db";
 import { getDefaultOperator } from "@/server/tenancy";
 import { formatMoney, TIER_NAMES } from "@/server/billing/pricing";
 import { rejectManualPaymentAction, settleMcpStatementAction, validateManualPaymentAction } from "./actions";
+import { DisputesPanel } from "./disputes";
 
 export const dynamic = "force-dynamic";
 
@@ -32,6 +33,25 @@ export default async function ConsoleArgentPage() {
     take: 24,
     include: { key: { include: { user: { select: { email: true } } } } },
   });
+  const [openDisputes, assignedMissions, recentEmails] = await Promise.all([
+    db.dispute.findMany({
+      where: { operatorId: operator.id, status: { in: ["OPEN", "UNDER_REVIEW"] } },
+      orderBy: { createdAt: "asc" },
+      include: { mission: { select: { title: true } } },
+    }),
+    db.mission.findMany({
+      where: { operatorId: operator.id, status: "ASSIGNED" },
+      orderBy: { updatedAt: "desc" },
+      take: 30,
+      select: { id: true, title: true },
+    }),
+    db.emailLog.findMany({
+      where: { operatorId: operator.id },
+      orderBy: { createdAt: "desc" },
+      take: 15,
+    }),
+  ]);
+  const dateFmt = new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" });
 
   return (
     <div className="flex flex-col gap-6">
@@ -158,6 +178,58 @@ export default async function ConsoleArgentPage() {
                   </div>
                   <Badge variant={p.status === "SUCCEEDED" ? "success" : "danger"}>
                     {p.status === "SUCCEEDED" ? "Encaissé" : "Rejeté/échoué"}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Litiges & escrow ({openDisputes.length})</CardTitle>
+          <CardDescription>
+            Arbitrage manuel des missions Guilde (cahier §6) — aucun mouvement d&apos;argent
+            automatique, chaque décision est motivée et auditée.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <DisputesPanel
+            missions={assignedMissions}
+            open={openDisputes.map((d) => ({
+              id: d.id,
+              missionTitle: d.mission.title,
+              reason: d.reason,
+              createdAt: dateFmt.format(d.createdAt),
+            }))}
+          />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Envois d&apos;emails</CardTitle>
+          <CardDescription>
+            Journal des emails transactionnels (cascade Resend→Mailgun→SendGrid) — sans clé
+            configurée, l&apos;état est <code className="font-mono text-xs">DEFERRED</code>, jamais un faux « envoyé ».
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {recentEmails.length === 0 ? (
+            <EmptyState title="Aucun envoi" description="Les emails transactionnels s'enregistrent ici (état, provider, erreur)." />
+          ) : (
+            <ul className="divide-y divide-line">
+              {recentEmails.map((e) => (
+                <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 py-2 text-sm">
+                  <span className="min-w-0">
+                    <span className="font-medium">{e.subject}</span>
+                    <span className="ml-2 font-mono text-xs text-ink-faint">
+                      {e.toEmail} · {e.template}{e.provider ? ` · ${e.provider}` : ""}
+                    </span>
+                  </span>
+                  <Badge variant={e.status === "SENT" ? "success" : e.status === "FAILED" ? "danger" : "gold"}>
+                    {e.status === "SENT" ? "Envoyé" : e.status === "FAILED" ? "Échec" : "Différé"}
                   </Badge>
                 </li>
               ))}

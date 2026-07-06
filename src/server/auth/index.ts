@@ -87,6 +87,11 @@ export const { handlers, auth, signIn, signOut, unstable_update: updateSession }
         token.roles = (user.roles as Role[] | undefined) ?? ["USER"];
         token.operatorId = user.operatorId ?? null;
         token.mfaEnabled = user.mfaEnabled ?? false;
+        // Propriété d'email prouvée (seed / OAuth). Requise pour élever en god-mode :
+        // empêche une inscription credentials sur un email god-mode non revendiqué
+        // d'auto-obtenir ADMIN (durcissement §11.2).
+        const owner = await db.user.findUnique({ where: { id: user.id }, select: { emailVerified: true } });
+        token.emailVerified = !!owner?.emailVerified;
       }
       // Rafraîchit rôles/MFA depuis la base quand la session est mise à jour (update()).
       if (trigger === "update" && token.uid) {
@@ -95,10 +100,12 @@ export const { handlers, auth, signIn, signOut, unstable_update: updateSession }
           token.roles = fresh.roles;
           token.operatorId = fresh.operatorId;
           token.mfaEnabled = fresh.mfaEnabled;
+          token.emailVerified = !!fresh.emailVerified;
         }
       }
-      // God-mode (cahier §2) : emails toujours élevés ADMIN + bypass des gates.
-      const god = isGodMode(token.email);
+      // God-mode (cahier §2) : emails élevés ADMIN + bypass des gates — MAIS
+      // uniquement si la propriété de l'email est prouvée (emailVerified).
+      const god = isGodMode(token.email) && token.emailVerified === true;
       token.godMode = god;
       if (god && !(token.roles ?? []).includes("ADMIN")) {
         token.roles = [...(token.roles ?? []), "ADMIN"];

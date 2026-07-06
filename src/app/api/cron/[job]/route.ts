@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { env } from "@/env";
 import { db } from "@/server/db";
@@ -20,7 +21,11 @@ function authorized(req: Request): boolean {
     return process.env.NODE_ENV !== "production";
   }
   const header = req.headers.get("authorization") ?? "";
-  return header === `Bearer ${secret}`;
+  const expected = `Bearer ${secret}`;
+  // Comparaison à temps constant (pas de fuite temporelle sur CRON_SECRET).
+  const a = Buffer.from(header);
+  const b = Buffer.from(expected);
+  return a.length === b.length && timingSafeEqual(a, b);
 }
 
 /** Récap hebdo des notifications non lues (founders, opt-out respecté). */

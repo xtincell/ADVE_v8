@@ -172,8 +172,8 @@
     {
       "id": "P3.hardening",
       "scope": "Phase 3 : responsive/a11y/i18n base, .env.example exhaustif, Dockerfile+standalone+pm2 vérifiés, README 5min, purge code mort, audit DoD ligne par ligne",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "Dockerfile multi-stage (migrate au boot, CLI prisma isolée /opt) + pm2 (instances:1, vérifié online) + README install 5 min ; build:standalone recette unique (bench/CI/pm2) ; layout runner assemblé à l'identique et exécuté (migrate + 200 sur /,/tarifs,/blog). Purge : 5 morts supprimés + ~20 exports refermés (knip) + config fantôme BLOB_STORAGE retirée. 3 audits à contexte frais → tous les constats réels corrigés (voir _build/DOD-AUDIT.md §8) : CRITIQUE Orange Money (relecture serveur→serveur + export RGPD durci), HAUTE god-mode (élévation gatée emailVerified), 4 tables orphelines dotées de surfaces réelles (Opérations cockpit : BrandAction+BrandRequest ; Console argent : Dispute+EmailLog), seed admin password durci, timingSafeEqual cron, témoignages démo étiquetés. Banc final 30/30 E2E + 37/37 unitaires. DOD-AUDIT.md ligne par ligne."
     },
     {
       "id": "OP.deploy-coolify",

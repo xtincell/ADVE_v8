@@ -195,6 +195,38 @@ export const orangeAdapter: PaymentProviderAdapter = {
   },
 };
 
+/**
+ * Relecture serveur→serveur du statut d'une transaction Orange (règle d'or §6) :
+ * le webhook n'ouvre JAMAIS de droit sur le seul statut auto-déclaré du callback.
+ * Réauthentifie et interroge /transactionstatus avec le payToken stocké.
+ */
+export async function orangeCheckStatus(
+  operatorId: string,
+  input: { orderId: string; amount: number; payToken: string | null },
+): Promise<boolean> {
+  if (!input.payToken) return false;
+  const creds = await getProviderCredentials<OrangeCreds>(operatorId, "orange_money");
+  if (!creds?.clientId) return false;
+  const tokenRes = await fetch("https://api.orange.com/oauth/v3/token", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${Buffer.from(`${creds.clientId}:${creds.clientSecret}`).toString("base64")}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "grant_type=client_credentials",
+  });
+  if (!tokenRes.ok) return false;
+  const { access_token } = (await tokenRes.json()) as { access_token: string };
+  const res = await fetch("https://api.orange.com/orange-money-webpay/v1/transactionstatus", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${access_token}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ order_id: input.orderId, amount: input.amount, pay_token: input.payToken }),
+  });
+  if (!res.ok) return false;
+  const data = (await res.json()) as { status?: string };
+  return data.status === "SUCCESS";
+}
+
 // ── CinetPay (alternatif multi-pays) ────────────────────────────────
 interface CinetCreds {
   apiKey: string;

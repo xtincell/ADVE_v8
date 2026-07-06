@@ -6,6 +6,7 @@ import { requireRole } from "@/server/auth/guards";
 const NAV: NavItem[] = [
   { href: "/cockpit", label: "Tableau de bord", exact: true },
   { href: "/cockpit/marque", label: "Ma marque" },
+  { href: "/cockpit/operations", label: "Opérations" },
   { href: "/cockpit/livrables", label: "Livrables" },
   { href: "/cockpit/intelligence", label: "Intelligence" },
   { href: "/cockpit/abonnement", label: "Abonnement" },
