@@ -133,15 +133,29 @@ export default async function LandingPage() {
       {/* ── MÉTHODE · bento asymétrique ────────────────────────────────────── */}
       <section className="border-t border-line py-24 lg:py-32">
         <div className="mx-auto max-w-[1400px] px-5 lg:px-8">
-          <Reveal className="max-w-2xl">
-            <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">La méthode ADVE</p>
-            <h2 className="mt-5 font-display text-4xl font-semibold tracking-tight md:text-5xl">
-              Quatre piliers déclarés. Quatre piliers dérivés.
-            </h2>
-            <p className="mt-4 text-lg text-ink-muted">
-              Vous déclarez qui est votre marque. La Fusée en dérive risques, lecture marché,
-              actions et stratégie. Chaque amendement recalcule votre score.
-            </p>
+          <Reveal className="grid items-center gap-10 lg:grid-cols-2 lg:gap-16">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">La méthode ADVE</p>
+              <h2 className="mt-5 font-display text-4xl font-semibold tracking-tight md:text-5xl">
+                Quatre piliers déclarés. Quatre piliers dérivés.
+              </h2>
+              <p className="mt-4 text-lg text-ink-muted">
+                Vous déclarez qui est votre marque. La Fusée en dérive risques, lecture marché,
+                actions et stratégie. Chaque amendement recalcule votre score.
+              </p>
+            </div>
+            <div className="relative overflow-hidden rounded-[2rem] border border-line/70 shadow-[0_40px_120px_-40px_rgba(229,100,88,0.4)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/images/atelier-creatif.webp"
+                alt="Créatifs de l'industrie africaine francophone au travail sur une identité de marque : croquis, tissus, moodboards"
+                width={1400}
+                height={1045}
+                className="aspect-[4/3] w-full object-cover"
+                loading="lazy"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-surface/35 to-transparent" aria-hidden />
+            </div>
           </Reveal>
           <div className="mt-14 grid gap-3 lg:grid-cols-12">
             {ADVE.map((p, i) => {
