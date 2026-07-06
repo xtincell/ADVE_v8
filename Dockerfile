@@ -11,13 +11,21 @@ COPY package.json package-lock.json ./
 COPY prisma ./prisma
 RUN npm ci --no-audit --no-fund
 
-# ── builder : build Next PUR (aucune validation d'env au build) ──────────────
+# ── builder : build Next PUR (aucun réseau, aucune vraie config) ─────────────
 FROM node:22-alpine AS builder
 RUN apk add --no-cache libc6-compat openssl
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# Placeholders de BUILD uniquement : la collecte de données de pages de Next
+# importe les modules de routes, dont la config NextAuth qui appelle env() au
+# niveau module — le schéma exige la PRÉSENCE de ces 3 clés. Aucune connexion
+# n'est ouverte au build (toutes les routes sont dynamiques) et rien ne fuit :
+# le runner est un étage séparé, l'env réel est injecté par l'hôte au runtime.
+ENV DATABASE_URL="postgresql://build:build@localhost:5432/build" \
+    NEXTAUTH_SECRET="build-placeholder-secret-32-chars!!" \
+    NEXT_PUBLIC_BASE_URL="http://localhost:3000"
 RUN npm run build
 
 # ── runner : artefact standalone + capacité de migration ─────────────────────
