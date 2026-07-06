@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonClass } from "@/components/ui/button";
 import { getSessionUser } from "@/server/auth/guards";
 import { MobileNav } from "./mobile-nav";
@@ -36,7 +35,6 @@ export async function PublicHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           {user ? (
             <Link href={homeFor(user.roles)} className={buttonClass({ variant: "outline", size: "sm" })}>
               Mon espace
