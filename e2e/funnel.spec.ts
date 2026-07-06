@@ -10,7 +10,9 @@ test.describe("Funnel public", () => {
     // ── Landing
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("étoile");
-    await page.getByRole("link", { name: "Obtenir mon diagnostic gratuit" }).click();
+    // Le CTA « Obtenir mon diagnostic gratuit » apparaît en héro et en clôture
+    // (même intention, même libellé) : on cible le premier (héro).
+    await page.getByRole("link", { name: "Obtenir mon diagnostic gratuit" }).first().click();
 
     // ── Démarrage du diagnostic (création du token)
     await expect(page).toHaveURL(/\/diagnostic$/);

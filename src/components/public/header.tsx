@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/logo";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonClass } from "@/components/ui/button";
 import { getSessionUser } from "@/server/auth/guards";
 import { MobileNav } from "./mobile-nav";
@@ -25,7 +24,7 @@ export async function PublicHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-surface/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-4">
-        <Link href="/" aria-label="La Fusée — accueil">
+        <Link href="/" aria-label="La Fusée, accueil">
           <Logo withTagline />
         </Link>
         <nav aria-label="Navigation principale" className="hidden items-center gap-6 md:flex">
@@ -36,7 +35,6 @@ export async function PublicHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-2">
-          <ThemeToggle />
           {user ? (
             <Link href={homeFor(user.roles)} className={buttonClass({ variant: "outline", size: "sm" })}>
               Mon espace

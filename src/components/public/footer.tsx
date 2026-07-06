@@ -75,7 +75,7 @@ export function PublicFooter() {
         </div>
         <div className="mt-10 flex flex-col justify-between gap-2 border-t border-line pt-6 text-xs text-ink-faint sm:flex-row">
           <p>© {new Date().getFullYear()} UPgraders. Tous droits réservés.</p>
-          <p>Dakar · Abidjan · Douala — paiement mobile money & carte.</p>
+          <p>Dakar, Abidjan, Douala. Paiement mobile money et carte.</p>
         </div>
       </div>
     </footer>
