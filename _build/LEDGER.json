@@ -178,8 +178,8 @@
     {
       "id": "OP.deploy-coolify",
       "scope": "Demande opérateur (chat 2026-07-05) : déployer sur Coolify en fin de mission (app + Postgres + env) — credentials hors repo",
-      "status": "pending",
-      "proof": ""
+      "status": "blocked",
+      "proof": "BLOQUÉ CÔTÉ INFRA (pas côté code). API Coolify joignable (v4.1.2), projet 'lafusee' + GitHub App 'average-ant' (accès repos xtincell) identifiés, artefact prêt (Dockerfile vérifié, CI verte sur 50f2f72). MAIS le serveur de déploiement ('localhost' et 'smiling-sheep') est is_reachable:False depuis le control plane Coolify, même après re-validation ; toutes les ressources existantes y sont 'exited:unhealthy' alors que les apps servent encore (powerupgraders.com → 200) — la connexion de GESTION Coolify↔serveur est tombée. Un déploiement s'exécute par SSH du control plane vers le serveur : impossible tant que la connexion n'est pas rétablie (créer app+DB+secrets ne ferait que produire des ressources orphelines). Action requise côté opérateur : revalider/reconnecter le serveur dans Coolify (clé SSH / agent), puis le déploiement est prêt à lancer (Dockerfile buildpack, port 3000, env DATABASE_URL/NEXTAUTH_SECRET/NEXT_PUBLIC_BASE_URL/CRON_SECRET/SEED_ADMIN_PASSWORD/GOD_MODE_EMAILS + seed one-off)."
     },
     {
       "id": "OUT.broadcast",
