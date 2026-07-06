@@ -4,7 +4,7 @@ import { useMemo, useState, useTransition } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, FieldError, FieldHint, Input, Label, Select, Textarea } from "@/components/ui/form";
 import type { IntakeAnswers } from "@/server/intake";
-import { saveDiagnosticStep, submitDiagnostic } from "../actions";
+import { prefillDiagnosticAction, saveDiagnosticStep, submitDiagnostic } from "../actions";
 
 export const SECTORS = [
   "Mode",
@@ -36,18 +36,57 @@ export function DiagnosticWizard({
   token,
   initialAnswers,
   countries,
+  llmAssist = false,
 }: {
   token: string;
   initialAnswers: Answers;
   countries: { code: string; name: string }[];
+  llmAssist?: boolean;
 }) {
   const [answers, setAnswers] = useState<Answers>(initialAnswers);
   const [step, setStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
+  const [freeText, setFreeText] = useState("");
+  const [prefillState, setPrefillState] = useState<{ busy?: boolean; done?: boolean; error?: string }>({});
 
   const set = (k: keyof IntakeAnswers, v: string | string[]) =>
     setAnswers((a) => ({ ...a, [k]: v }));
+
+  // Pré-remplissage IA (optionnel) : ne touche que les champs ENCORE VIDES —
+  // les champs soumis tels quels resteront « À valider » au cockpit.
+  const runPrefill = () => {
+    setPrefillState({ busy: true });
+    startTransition(async () => {
+      const res = await prefillDiagnosticAction(token, freeText, SECTORS);
+      if (!res.ok) {
+        setPrefillState({ error: res.error });
+        return;
+      }
+      setAnswers((a) => {
+        const next = { ...a };
+        const maybe = (k: keyof IntakeAnswers, v: string | string[] | undefined) => {
+          if (v == null || (Array.isArray(v) ? v.length === 0 : !v.trim())) return;
+          const cur = next[k];
+          if (cur == null || (Array.isArray(cur) ? cur.length === 0 : !String(cur).trim())) {
+            (next as Record<string, string | string[]>)[k] = v;
+          }
+        };
+        maybe("brandName", res.prefill.brandName);
+        maybe("city", res.prefill.city);
+        maybe("online", res.prefill.online);
+        if (res.prefill.sector && SECTORS.includes(res.prefill.sector)) maybe("sector", res.prefill.sector);
+        maybe("histoire", res.prefill.histoire);
+        maybe("valeurs", res.prefill.valeurs);
+        maybe("preuves", res.prefill.preuves);
+        maybe("canaux", res.prefill.canaux);
+        maybe("rituels", res.prefill.rituels);
+        maybe("communaute", res.prefill.communaute);
+        return next;
+      });
+      setPrefillState({ done: true });
+    });
+  };
 
   const steps: StepDef[] = useMemo(
     () => [
@@ -279,6 +318,38 @@ export function DiagnosticWizard({
       </p>
       <h1 className="mt-2 text-2xl font-semibold md:text-3xl">{current.title}</h1>
       <p className="mt-2 text-sm text-ink-muted">{current.intro}</p>
+
+      {llmAssist && step === 0 && (
+        <details className="mt-6 rounded-(--radius-md) border border-line bg-surface-raised p-4">
+          <summary className="cursor-pointer text-sm font-medium">
+            Gagner du temps : pré-remplir depuis un texte libre (IA)
+          </summary>
+          <p className="mt-2 text-xs text-ink-muted">
+            Collez votre bio, la page « à propos » de votre site, un pitch… L&apos;IA ne remplit que
+            ce qui s&apos;y trouve vraiment, uniquement les champs vides — et tout champ pré-rempli
+            restera marqué « à valider » tant que vous n&apos;y aurez pas retouché.
+          </p>
+          <Textarea
+            value={freeText}
+            onChange={(e) => setFreeText(e.target.value)}
+            rows={5}
+            className="mt-3"
+            placeholder="Ex. : Nyama Café torréfie à Dakar des cafés d'Afrique…"
+            aria-label="Texte libre à analyser"
+          />
+          <div className="mt-2 flex items-center gap-3">
+            <Button type="button" size="sm" variant="outline" onClick={runPrefill} disabled={pending || prefillState.busy}>
+              {prefillState.busy ? "Analyse…" : "Pré-remplir le questionnaire"}
+            </Button>
+            {prefillState.done && (
+              <span className="text-xs font-medium text-success">
+                Champs proposés — relisez chaque étape avant de valider.
+              </span>
+            )}
+          </div>
+          <FieldError>{prefillState.error}</FieldError>
+        </details>
+      )}
 
       <div className="mt-8 flex flex-col gap-5">
         {typeof current.fields === "function" ? current.fields(answers, set) : current.fields}

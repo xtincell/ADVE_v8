@@ -166,8 +166,8 @@
     {
       "id": "X.llm",
       "scope": "§9 Gateway LLM multi-provider fallback (Anthropic→OpenAI→Ollama→OpenRouter), Zod+retry, tous usages optionnels avec équivalent manuel",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "Gateway fetch pur (zéro SDK) : chaîne LLM_PRIMARY_PROVIDER→fallback, sortie Zod + 1 retry avec erreur explicitée (jamais de coercition), journal LlmCall (Console audit : par usage + 20 derniers) — 6 tests unitaires fetch simulé (indisponible/fallback/réordre/retry/échec persistant/extractJson). 5 usages branchés, tous optionnels (llmAvailable) : intake prefill (champs non-inférables exclus par construction, soumis tel quel ⇒ INFERRED « à valider » via llmPrefill), reformulation ADVE 2 modes en PREVIEW (écriture = saveFieldAction humain), Oracle 22–35 Enrichir (snapshot gelé, déterministe intact en échec, badge Enrichie IA), asset Améliorer (nouveau DRAFT llmUsed, original intact), brief Guilde structuré (relu puis soumis, mission.llmAssisted). E2E llm.spec 3/3 : zéro clé ⇒ zéro façade IA, déterministe entier — banc 28/28."
     },
     {
       "id": "P3.hardening",

@@ -9,7 +9,9 @@ import { getOwnedBrand } from "@/server/brands/queries";
 import { assetContentSchema } from "@/server/assets";
 import { EXPOSED_KINDS } from "@/server/assets/composers";
 import { db } from "@/server/db";
+import { llmAvailable } from "@/server/llm/gateway";
 import { activateAssetAction, archiveAssetAction, reforgeAssetAction, updateAssetAction } from "../../actions";
+import { ImproveButton } from "./improve-button";
 
 export const dynamic = "force-dynamic";
 
@@ -65,6 +67,7 @@ export default async function AssetPage({ params }: { params: Promise<{ id: stri
           <input type="hidden" name="id" value={asset.id} />
           <Button type="submit" variant="outline">Reforger depuis le socle actuel</Button>
         </form>
+        {llmAvailable() && <ImproveButton assetId={asset.id} />}
         {asset.status !== "ARCHIVED" && (
           <form action={archiveAssetAction}>
             <input type="hidden" name="id" value={asset.id} />

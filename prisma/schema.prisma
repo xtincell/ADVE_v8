@@ -439,6 +439,7 @@ model IntakeSession {
   score       Int?
   tier        BrandTier?
   llmAssisted Boolean      @default(false)
+  llmPrefill  Json? // valeurs proposées par l'IA — un champ soumis tel quel devient INFERRED (à valider)
   brandId     String? // marque créée à l'activation
   brand       Brand?       @relation(fields: [brandId], references: [id])
   submittedAt DateTime?

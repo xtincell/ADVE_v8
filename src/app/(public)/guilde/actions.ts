@@ -17,6 +17,40 @@ export interface DepositFormState {
   error?: string;
 }
 
+/**
+ * Brouillon de brief IA (cahier §9) — OPTIONNEL : structure une description
+ * brute vers les champs du formulaire ; le déposant relit, complète (contact,
+ * budget) et soumet lui-même. La mission porte alors llmAssisted.
+ */
+export async function draftMissionAction(input: { raw: string }): Promise<
+  | { ok: true; draft: { title: string; summary: string; contexte: string; objectifs: string; livrables: string; contraintes: string; skills: string } }
+  | { ok: false; error: string }
+> {
+  const { llmAvailable } = await import("@/server/llm/gateway");
+  if (!llmAvailable()) return { ok: false, error: "Assistance IA non configurée." };
+  if (input.raw.trim().length < 40) {
+    return { ok: false, error: "Décrivez votre besoin en quelques phrases (40 caractères min.)." };
+  }
+  try {
+    const { draftMission } = await import("@/server/llm/usages");
+    const d = await draftMission(input.raw);
+    return {
+      ok: true,
+      draft: {
+        title: d.title,
+        summary: d.summary,
+        contexte: d.contexte,
+        objectifs: d.objectifs.join("\n"),
+        livrables: d.livrables.join("\n"),
+        contraintes: d.contraintes ?? "",
+        skills: (d.skills ?? []).join(", "),
+      },
+    };
+  } catch {
+    return { ok: false, error: "L'assistance IA n'a pas répondu — remplissez le brief à la main." };
+  }
+}
+
 export async function depositMissionAction(_prev: DepositFormState, formData: FormData): Promise<DepositFormState> {
   const raw = Object.fromEntries(formData.entries());
   const parsed = missionDepositSchema.safeParse({

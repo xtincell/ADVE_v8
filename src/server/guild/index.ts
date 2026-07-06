@@ -32,6 +32,7 @@ export const missionDepositSchema = z.object({
   budgetMin: z.coerce.number().int().min(0).max(100_000_000).optional(),
   budgetMax: z.coerce.number().int().min(0).max(100_000_000).optional(),
   deadline: z.string().optional().or(z.literal("")),
+  llmAssisted: z.coerce.boolean().optional(), // brief ébauché par l'IA puis relu par le déposant
 });
 
 export type MissionDeposit = z.infer<typeof missionDepositSchema>;
@@ -97,6 +98,7 @@ export async function depositMission(operatorId: string, input: MissionDeposit) 
       contactEmail: input.contactEmail,
       contactPhone: input.contactPhone || null,
       status: "PENDING_REVIEW",
+      llmAssisted: input.llmAssisted ?? false,
     },
   });
   return mission;

@@ -44,6 +44,29 @@ export async function regenerateSectionAction(formData: FormData): Promise<void>
   revalidatePath(`/cockpit/livrables/oracle/${reportId}`);
 }
 
+/**
+ * Enrichissement IA d'une section 22–35 (cahier §5.1/§9) — OPTIONNEL. Le socle
+ * reste le snapshot gelé ; en échec, le contenu déterministe demeure intact.
+ */
+export async function enrichSectionAction(formData: FormData): Promise<void> {
+  const { llmAvailable } = await import("@/server/llm/gateway");
+  if (!llmAvailable()) return;
+  const user = await requireUser("/cockpit/livrables");
+  const reportId = String(formData.get("reportId") ?? "");
+  const number = Number(formData.get("number") ?? 0);
+  const report = await db.oracleReport.findUnique({ where: { id: reportId } });
+  if (!report) return;
+  const brand = await getOwnedBrand(user, report.brandId);
+  if (!brand) return;
+  try {
+    const { enrichOracleSection } = await import("@/server/llm/usages");
+    await enrichOracleSection(reportId, number);
+  } catch {
+    // Échec LLM : la section déterministe reste en place — rien à casser.
+  }
+  revalidatePath(`/cockpit/livrables/oracle/${reportId}`);
+}
+
 // ─────────────────────────────── Forge & vault d'assets (cahier §5.2)
 
 export interface ForgeFormState {
@@ -108,6 +131,25 @@ export async function reforgeAssetAction(formData: FormData): Promise<void> {
     actor: owned.actor,
   });
   redirect(`/cockpit/livrables/asset/${fresh.id}`);
+}
+
+/**
+ * Amélioration IA d'un asset (cahier §9) — crée une NOUVELLE version DRAFT
+ * marquée llmUsed ; l'asset d'origine reste intact, l'humain arbitre.
+ */
+export async function improveAssetAction(_prev: ForgeFormState, formData: FormData): Promise<ForgeFormState> {
+  const { llmAvailable } = await import("@/server/llm/gateway");
+  if (!llmAvailable()) return { error: "Assistance IA non configurée." };
+  const owned = await ownedAsset(String(formData.get("id") ?? ""));
+  if (!owned) return { error: "Asset introuvable ou accès refusé." };
+  let draftId: string;
+  try {
+    const { improveAsset } = await import("@/server/llm/usages");
+    draftId = await improveAsset(owned.asset.id, owned.actor.id);
+  } catch {
+    return { error: "L'assistance IA n'a pas répondu — l'asset reste intact." };
+  }
+  redirect(`/cockpit/livrables/asset/${draftId}`);
 }
 
 /** Édition manuelle des textes de sections (manual-first). */

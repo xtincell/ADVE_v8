@@ -5,10 +5,12 @@ import { Button, buttonClass } from "@/components/ui/button";
 import { SectionBlocks } from "@/components/oracle-blocks";
 import { requireUser } from "@/server/auth/guards";
 import { getOwnedBrand } from "@/server/brands/queries";
+import { llmAvailable } from "@/server/llm/gateway";
 import { getReportWithSections } from "@/server/oracle/generate";
 import type { SectionContent } from "@/server/oracle/blocks";
+import { sectionDef } from "@/server/oracle/sections";
 import { TIER_LABELS } from "@/server/scoring/score";
-import { regenerateSectionAction } from "../../actions";
+import { enrichSectionAction, regenerateSectionAction } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +29,7 @@ export default async function OracleReportPage({ params }: { params: Promise<{ i
   if (!report) notFound();
   const brand = await getOwnedBrand(user, report.brandId);
   if (!brand) notFound();
+  const llmAssist = llmAvailable();
 
   return (
     <div className="flex flex-col gap-6">
@@ -81,16 +84,33 @@ export default async function OracleReportPage({ params }: { params: Promise<{ i
                   <h2 className="font-display text-lg font-semibold">{s.title}</h2>
                   <Badge variant="outline">{s.tier}</Badge>
                   <Badge variant={status.variant}>{status.label}</Badge>
+                  {s.llmUsed && <Badge variant="info">Enrichie IA</Badge>}
                 </div>
-                {(s.status === "FAILED" || s.status === "STALE") && (
-                  <form action={regenerateSectionAction}>
-                    <input type="hidden" name="reportId" value={report.id} />
-                    <input type="hidden" name="number" value={s.number} />
-                    <Button type="submit" variant="outline" size="sm">
-                      Régénérer cette section
-                    </Button>
-                  </form>
-                )}
+                <div className="flex items-center gap-2">
+                  {(s.status === "FAILED" || s.status === "STALE") && (
+                    <form action={regenerateSectionAction}>
+                      <input type="hidden" name="reportId" value={report.id} />
+                      <input type="hidden" name="number" value={s.number} />
+                      <Button type="submit" variant="outline" size="sm">
+                        Régénérer cette section
+                      </Button>
+                    </form>
+                  )}
+                  {llmAssist && sectionDef(s.number).llmEligible && s.status === "COMPLETE" && (
+                    <form action={enrichSectionAction}>
+                      <input type="hidden" name="reportId" value={report.id} />
+                      <input type="hidden" name="number" value={s.number} />
+                      <Button
+                        type="submit"
+                        variant="ghost"
+                        size="sm"
+                        title="Réécrit cette section depuis le snapshot gelé — le déterministe reste la base en cas d'échec"
+                      >
+                        {s.llmUsed ? "Ré-enrichir (IA)" : "Enrichir (IA)"}
+                      </Button>
+                    </form>
+                  )}
+                </div>
               </div>
               <div className="pt-4">
                 {s.status === "COMPLETE" && s.content ? (

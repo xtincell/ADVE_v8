@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { db } from "@/server/db";
+import { llmAvailable } from "@/server/llm/gateway";
 import { DepositForm } from "./deposit-form";
 
 export const metadata: Metadata = {
@@ -25,7 +26,7 @@ export default async function DeposerPage() {
         est clair, budgété et sérieux. Vos coordonnées ne sont <strong className="text-ink">jamais</strong>{" "}
         affichées publiquement : les candidatures vous parviennent via l&apos;opérateur.
       </p>
-      <DepositForm countries={countries} />
+      <DepositForm countries={countries} llmAssist={llmAvailable()} />
     </div>
   );
 }

@@ -157,3 +157,41 @@ export async function deleteSourceAction(formData: FormData): Promise<void> {
   await db.brandSource.delete({ where: { id } });
   revalidatePath("/cockpit/marque/sources");
 }
+
+/**
+ * Reformulation assistée d'un champ ADVE (cahier §9) — PREVIEW UNIQUEMENT :
+ * la suggestion revient au client, l'écriture reste le geste humain
+ * (saveFieldAction → amendPillar, certitude DECLARED). Optionnel (llmAvailable).
+ */
+export async function reformulateFieldAction(input: {
+  brandId: string;
+  kind: string;
+  key: string;
+  value: string;
+  mode: "LLM_REFORMULATE" | "LLM_STRATEGIC";
+}): Promise<{ ok: true; suggestion: string } | { ok: false; error: string }> {
+  const { llmAvailable } = await import("@/server/llm/gateway");
+  if (!llmAvailable()) return { ok: false, error: "Assistance IA non configurée." };
+  const user = await requireUser("/cockpit/marque");
+  const brand = await getOwnedBrand(user, input.brandId);
+  if (!brand) return { ok: false, error: "Marque introuvable ou accès refusé." };
+  if (isDerived(input.kind as PillarKind)) return { ok: false, error: "Les piliers dérivés ne s'éditent pas." };
+  if (!fieldDef(input.kind as PillarKind, input.key)) return { ok: false, error: "Champ inconnu." };
+  if (input.value.trim().length < 10) {
+    return { ok: false, error: "Écrivez d'abord une version (10 caractères min.) — l'IA reformule, elle n'invente pas." };
+  }
+  try {
+    const { reformulateField } = await import("@/server/llm/usages");
+    const suggestion = await reformulateField({
+      brandId: brand.id,
+      operatorId: brand.operatorId,
+      kind: input.kind,
+      fieldKey: input.key,
+      currentValue: input.value,
+      mode: input.mode,
+    });
+    return { ok: true, suggestion };
+  } catch {
+    return { ok: false, error: "L'assistance IA n'a pas répondu — votre texte reste intact." };
+  }
+}

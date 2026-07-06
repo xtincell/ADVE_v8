@@ -1,6 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { db } from "@/server/db";
 import { getIntakeSession, type IntakeAnswers } from "@/server/intake";
+import { llmAvailable } from "@/server/llm/gateway";
 import { DiagnosticWizard } from "./wizard";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,7 @@ export default async function DiagnosticTokenPage({ params }: { params: Promise<
       token={token}
       initialAnswers={(session.answers ?? {}) as Partial<IntakeAnswers>}
       countries={countries}
+      llmAssist={llmAvailable()}
     />
   );
 }

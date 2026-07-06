@@ -53,8 +53,15 @@ const ANSWER_TO_FIELD: Record<string, { kind: PillarKind; key: string }> = {
 
 export type DraftPillars = Partial<Record<PillarKind, PillarFields>>;
 
-/** Construit l'ébauche ADVE à partir des réponses — pur, déterministe. */
-export function draftFromAnswers(answers: Partial<IntakeAnswers>): DraftPillars {
+/**
+ * Construit l'ébauche ADVE à partir des réponses — pur, déterministe.
+ * Un champ pré-rempli par l'IA et soumis TEL QUEL reste INFERRED (badge « À
+ * valider » au cockpit) ; dès que l'humain l'a retouché, il devient DECLARED.
+ */
+export function draftFromAnswers(
+  answers: Partial<IntakeAnswers>,
+  llmPrefill?: Partial<Record<string, string | string[]>> | null,
+): DraftPillars {
   const now = new Date().toISOString();
   const draft: DraftPillars = {};
   for (const [answerKey, target] of Object.entries(ANSWER_TO_FIELD)) {
@@ -70,10 +77,21 @@ export function draftFromAnswers(answers: Partial<IntakeAnswers>): DraftPillars 
       // Les champs « liste » saisis en textarea : une entrée par ligne.
       if (target.key === "valeurs") value = value.split("\n").map((s) => s.trim()).filter(Boolean);
     }
+    const prefilled = llmPrefill?.[answerKey];
+    const untouched =
+      prefilled != null && JSON.stringify(normalize(prefilled)) === JSON.stringify(normalize(raw));
     draft[target.kind] = draft[target.kind] ?? {};
-    draft[target.kind]![target.key] = { value, certainty: "DECLARED", updatedAt: now };
+    draft[target.kind]![target.key] = {
+      value,
+      certainty: untouched ? "INFERRED" : "DECLARED",
+      updatedAt: now,
+    };
   }
   return draft;
+}
+
+function normalize(v: string | string[]): string | string[] {
+  return Array.isArray(v) ? v.map((s) => s.trim()).filter(Boolean) : v.trim();
 }
 
 /** Score d'une ébauche (ADVE seul — les RTIS naissent dans le cockpit). */
@@ -114,7 +132,7 @@ export async function submitIntake(token: string) {
   const session = await db.intakeSession.findUniqueOrThrow({ where: { token } });
   if (session.status === "ACTIVATED") throw new Error("Ce diagnostic a déjà été activé.");
   const answers = intakeAnswersSchema.parse(session.answers);
-  const draft = draftFromAnswers(answers);
+  const draft = draftFromAnswers(answers, session.llmPrefill as Partial<Record<string, string | string[]>> | null);
   const { composite } = scoreDraft(draft);
   const tier = tierForScore(composite);
   return db.intakeSession.update({

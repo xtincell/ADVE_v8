@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { requireUser } from "@/server/auth/guards";
 import { getPillarWithHistory } from "@/server/brands/queries";
 import { asPillarFields, pillarDef, type FieldState } from "@/server/brands/pillar-config";
+import { llmAvailable } from "@/server/llm/gateway";
 import { PILLAR_MAX } from "@/server/scoring/score";
 import { refreshPillarAction } from "../actions";
 import { FieldEditor } from "./field-editor";
@@ -58,6 +59,7 @@ export default async function PillarPage({
   const { brand, pillar, versions } = data;
   const def = pillarDef(kind);
   const fields = asPillarFields(pillar?.fields);
+  const llmAssist = llmAvailable();
 
   return (
     <div className="flex flex-col gap-6">
@@ -153,6 +155,7 @@ export default async function PillarPage({
                 inferable={f.inferable}
                 value={displayValue(state)}
                 certainty={state?.certainty ?? null}
+                llmAssist={llmAssist}
               />
             );
           })}
