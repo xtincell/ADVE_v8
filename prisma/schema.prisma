@@ -282,6 +282,7 @@ model User {
   phone         String?
   mfaSecret     String? // chiffré (vault)
   mfaEnabled    Boolean   @default(false)
+  digestOptOut  Boolean   @default(false)
   emailVerified DateTime?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -438,6 +439,7 @@ model IntakeSession {
   score       Int?
   tier        BrandTier?
   llmAssisted Boolean      @default(false)
+  llmPrefill  Json? // valeurs proposées par l'IA — un champ soumis tel quel devient INFERRED (à valider)
   brandId     String? // marque créée à l'activation
   brand       Brand?       @relation(fields: [brandId], references: [id])
   submittedAt DateTime?

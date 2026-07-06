@@ -25,6 +25,9 @@ jobs:
       DATABASE_URL: postgresql://lafusee:lafusee@localhost:5432/lafusee
       NEXTAUTH_SECRET: ci-secret-not-for-production-0000000000000
       NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      PAYMENT_MOCK_ENABLED: "true"
+      MANUAL_PAYMENT_WHATSAPP_NUMBER: "221770000000"
+      CRON_SECRET: ci-cron-secret-0000
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -37,8 +40,8 @@ jobs:
       - run: npm test
       - run: npm run db:migrate
       - run: npm run db:seed
-      - run: npm run build
-      - name: E2E (parcours d'argent)
+      - run: npm run build:standalone
+      - name: E2E (parcours d'argent, servis par le standalone)
         run: |
           npx playwright install --with-deps chromium
           npm run e2e

@@ -1,37 +1,203 @@
 {
   "mission": "La Fusée v2 — rebuild production-ready conforme à CAHIER-DES-CHARGES.md",
-  "statuses": ["pending", "in_progress", "done", "out"],
+  "statuses": [
+    "pending",
+    "in_progress",
+    "done",
+    "out"
+  ],
   "items": [
-    { "id": "P0.foundations", "scope": "Scaffold Next15+Prisma+outillage (lint, typecheck, vitest, playwright, scripts npm, init.sh, CI)", "status": "in_progress", "proof": "" },
-    { "id": "S1.schema", "scope": "§13.1 Schéma DB + migrations (38 tables)", "status": "done", "proof": "prisma/migrations/*_init — 39 tables en DB (psql \\dt)" },
-    { "id": "S1.auth", "scope": "§13.1 Auth NextAuth v5 credentials bcrypt + Google conditionnel + JWT + MFA TOTP admin + god-mode env", "status": "pending", "proof": "" },
-    { "id": "S1.tenancy", "scope": "§13.1 Scoping tenant par défaut (helpers db scopés)", "status": "pending", "proof": "" },
-    { "id": "S1.design", "scope": "§13.1 Design tokens 2 niveaux + layout + navigation (corail #E56458, or #FACC15, Clash/Satoshi/JetBrains)", "status": "pending", "proof": "" },
-    { "id": "S1.seeds", "scope": "§13.1+§11.4 Seeds idempotents : admin god-mode, canon UPgraders+La Fusée, pays/zones+grille, démo (marque+missions)", "status": "pending", "proof": "" },
-    { "id": "S2.funnel", "scope": "§13.2 Funnel public : landing → intake token → résultat scoré → paywall → activation compte+marque, E2E vert", "status": "pending", "proof": "" },
-    { "id": "S2.legal", "scope": "§13.2 Pages légales FR : CGU, CGV, SLA, DPA, mentions, confidentialité, trust-center, statut", "status": "pending", "proof": "" },
-    { "id": "S2.pricing", "scope": "§13.2 /pricing + /tarifs dérivés de la grille DB, FCFA d'abord", "status": "pending", "proof": "" },
-    { "id": "S3.adve", "scope": "§13.3 ADVE : édition champ par champ, certitude DECLARED/INFERRED/OFFICIAL, 7 champs non-inférables, versions, point d'écriture unique", "status": "pending", "proof": "" },
-    { "id": "S3.scoring", "scope": "§13.3 Scoring déterministe /200 + paliers + snapshots historisés + tests unitaires", "status": "pending", "proof": "" },
-    { "id": "S3.rtis", "scope": "§13.3 RTIS refresh (par pilier + chaîne), cascade A→…→S, staleness propagée visible UI", "status": "pending", "proof": "" },
-    { "id": "S4.oracle", "scope": "§13.4 Oracle 21 sections déterministes + 22–35 LLM optionnel fallback honnête + statuts par section + régénération unitaire", "status": "pending", "proof": "" },
-    { "id": "S4.pdf", "scope": "§13.4 Pile PDF unique (PDFKit, zéro Chromium) : Oracle + rapport intake, snapshot horodaté + hash", "status": "pending", "proof": "" },
-    { "id": "S5.stripe", "scope": "§13.5 Stripe checkout + webhooks signés idempotents (one-shots + récurrents)", "status": "pending", "proof": "" },
-    { "id": "S5.manual", "scope": "§13.5 Paiement manuel WhatsApp : pending_manual (zéro droit) → file validation Console → activation 30j", "status": "pending", "proof": "" },
-    { "id": "S5.mobile", "scope": "§13.5 Clients HTTP réels Wave/MTN MoMo/Orange Money (+CinetPay/PayPal routing) — DEFERRED_AWAITING_CREDENTIALS sans clés", "status": "pending", "proof": "" },
-    { "id": "S5.gates", "scope": "§13.5 Gates premium TIER_GATE_DENIED structuré + god-mode bypass + montants nuls + grille localisée", "status": "pending", "proof": "" },
-    { "id": "S6.console", "scope": "§13.6 Console : comptes/rôles/MFA, portefeuille marques, argent (file manuelle, factures, commissions, litiges, grille, relevés MCP), vault credentials, config, audit", "status": "pending", "proof": "" },
-    { "id": "S7.guild", "scope": "§13.7 Guilde : mur public, fiches slug, dépôt (marque shell), inscriptions talent/agence, modération, candidatures, devis", "status": "pending", "proof": "" },
-    { "id": "S8.notifications", "scope": "§13.8 SSE unique (heartbeat, ?since=) + push VAPID opt-in + email cascade Resend→Mailgun→SendGrid + digest hebdo + crons HTTP CRON_SECRET", "status": "pending", "proof": "" },
-    { "id": "S9.intelligence", "scope": "§13.9 Snapshots + feeds réels (World Bank, RSS Google News) + Devotion Ladder + Cult Index + radar Overton heuristique (DEGRADED/INSUFFICIENT_DATA) + journal coûts LLM", "status": "pending", "proof": "" },
-    { "id": "S9.assets", "scope": "§13.9 Vault d'assets + forge de base (kinds v1, déterministe d'abord, LLM optionnel, lifecycle+staleAt)", "status": "pending", "proof": "" },
-    { "id": "S10.creator", "scope": "§13.10 Espace Creator mince : profil, missions, devis, earnings", "status": "pending", "proof": "" },
-    { "id": "S10.agency", "scope": "§13.10 Espace Agency mince : marques clientes + score moyen, missions, commissions", "status": "pending", "proof": "" },
-    { "id": "S10.mcp", "scope": "§13.10 MCP facturable : endpoint unique, clés hashées affichées une fois, comptage, relevés gelés", "status": "pending", "proof": "" },
-    { "id": "X.llm", "scope": "§9 Gateway LLM multi-provider fallback (Anthropic→OpenAI→Ollama→OpenRouter), Zod+retry, tous usages optionnels avec équivalent manuel", "status": "pending", "proof": "" },
-    { "id": "P3.hardening", "scope": "Phase 3 : responsive/a11y/i18n base, .env.example exhaustif, Dockerfile+standalone+pm2 vérifiés, README 5min, purge code mort, audit DoD ligne par ligne", "status": "pending", "proof": "" },
-    { "id": "OUT.broadcast", "scope": "Broadcast publicitaire (Meta/Google/X/TikTok) + SMS", "status": "out", "proof": "cahier §7 : façades v1 non câblées, ne pas reconstruire" },
-    { "id": "OUT.argos", "scope": "Argos vitrine média", "status": "out", "proof": "cahier §4.6 : v2.1, route réservée" },
-    { "id": "OUT.divers", "scope": "Académie/QC pair/communauté creator, arbre FMCG multi-niveaux, escrow auto, embeddings/ML, Redis/multi-pod, app mobile, GraphQL", "status": "out", "proof": "cahier §13 OUT explicite" }
+    {
+      "id": "P0.foundations",
+      "scope": "Scaffold Next15+Prisma+outillage (lint, typecheck, vitest, playwright, scripts npm, init.sh, CI)",
+      "status": "done",
+      "proof": "commit 9c295c3 ; typecheck/lint/build verts ; Playwright ~1.56 aligné chromium-1194"
+    },
+    {
+      "id": "S1.schema",
+      "scope": "§13.1 Schéma DB + migrations (38 tables)",
+      "status": "done",
+      "proof": "prisma/migrations/*_init — 39 tables en DB (psql \\dt)"
+    },
+    {
+      "id": "S1.auth",
+      "scope": "§13.1 Auth NextAuth v5 credentials bcrypt + Google conditionnel + JWT + MFA TOTP admin + god-mode env",
+      "status": "done",
+      "proof": "src/server/auth/* ; login E2E vert ; MFA vérifié au login (enrôlement Console en S6)"
+    },
+    {
+      "id": "S1.tenancy",
+      "scope": "§13.1 Scoping tenant par défaut (helpers db scopés)",
+      "status": "done",
+      "proof": "src/server/tenancy.ts ; operatorId sur toutes les tables métier"
+    },
+    {
+      "id": "S1.design",
+      "scope": "§13.1 Design tokens 2 niveaux + layout + navigation (corail #E56458, or #FACC15, Clash/Satoshi/JetBrains)",
+      "status": "done",
+      "proof": "globals.css @theme ; fonts auto-hébergées ; header/footer/app-shell ; dark/light"
+    },
+    {
+      "id": "S1.seeds",
+      "scope": "§13.1+§11.4 Seeds idempotents : admin god-mode, canon UPgraders+La Fusée, pays/zones+grille, démo (marque+missions)",
+      "status": "done",
+      "proof": "npm run db:seed ×2 sans doublon ; canon 193/200 ICONE ; démo 89 ORDINAIRE ; E2E démo vert"
+    },
+    {
+      "id": "S2.funnel",
+      "scope": "§13.2 Funnel public : landing → intake token → résultat scoré → paywall → activation compte+marque, E2E vert",
+      "status": "done",
+      "proof": "e2e/funnel.spec.ts 3/3 verts (desktop+mobile) ; paywall stub → checkout réel en S5"
+    },
+    {
+      "id": "S2.legal",
+      "scope": "§13.2 Pages légales FR : CGU, CGV, SLA, DPA, mentions, confidentialité, trust-center, statut",
+      "status": "done",
+      "proof": "8 pages sous /legal + /statut dynamique (ping DB réel) ; faits société en [À COMPLÉTER] ; smoke 200"
+    },
+    {
+      "id": "S2.pricing",
+      "scope": "§13.2 /pricing + /tarifs dérivés de la grille DB, FCFA d'abord",
+      "status": "done",
+      "proof": "/tarifs 3 zones depuis PriceRule (FCFA d'abord, EUR diaspora vérifié) + alias /pricing 307"
+    },
+    {
+      "id": "S3.adve",
+      "scope": "§13.3 ADVE : édition champ par champ, certitude DECLARED/INFERRED/OFFICIAL, 7 champs non-inférables, versions, point d'écriture unique",
+      "status": "done",
+      "proof": "e2e/methode.spec.ts vert ; FieldEditor certitude+validation ; 7 non-inférables verrouillés (test unitaire + rejet amendPillar) ; PillarVersion historisé"
+    },
+    {
+      "id": "S3.scoring",
+      "scope": "§13.3 Scoring déterministe /200 + paliers + snapshots historisés + tests unitaires",
+      "status": "done",
+      "proof": "src/server/scoring 13 tests verts ; verrou anti-LLM ; snapshots à chaque amendement (BrandSnapshot)"
+    },
+    {
+      "id": "S3.rtis",
+      "scope": "§13.3 RTIS refresh (par pilier + chaîne), cascade A→…→S, staleness propagée visible UI",
+      "status": "done",
+      "proof": "refresh par pilier + chaîne A→…→S ; staleness UI (bannières+badges) ; E2E vert ; dérivé refuse l'édition (E2E)"
+    },
+    {
+      "id": "S4.oracle",
+      "scope": "§13.4 Oracle 21 sections déterministes + 22–35 LLM optionnel fallback honnête + statuts par section + régénération unitaire",
+      "status": "done",
+      "proof": "35 sections composées (21 CORE det. + 22–35 fallback honnête llmEligible) ; statuts/section + régénération unitaire ; 22 tests unitaires mappers ; E2E vert ; staleness auto via amendPillar"
+    },
+    {
+      "id": "S4.pdf",
+      "scope": "§13.4 Pile PDF unique (PDFKit, zéro Chromium) : Oracle + rapport intake, snapshot horodaté + hash",
+      "status": "done",
+      "proof": "PDFKit unique, OTF embarquées, hash+horodatage en couverture+pieds ; /api/oracle/[id]/pdf vérifié E2E (%PDF-, >20Ko) ; rapport intake PDF branché en S5 (paiement)"
+    },
+    {
+      "id": "S5.stripe",
+      "scope": "§13.5 Stripe checkout + webhooks signés idempotents (one-shots + récurrents)",
+      "status": "done",
+      "proof": "Adapter checkout (one-shot+récurrent, XOF zéro-décimale) + webhook signé corps brut idempotent (completed/invoice.paid/sub.updated) — testable dès clés fournies"
+    },
+    {
+      "id": "S5.manual",
+      "scope": "§13.5 Paiement manuel WhatsApp : pending_manual (zéro droit) → file validation Console → activation 30j",
+      "status": "done",
+      "proof": "E2E vert : checkout manuel → référence+wa.me → PENDING sans droit → validation Console (settle audité+facture) → abonnement ACTIF 30j"
+    },
+    {
+      "id": "S5.mobile",
+      "scope": "§13.5 Clients HTTP réels Wave/MTN MoMo/Orange Money (+CinetPay/PayPal routing) — DEFERRED_AWAITING_CREDENTIALS sans clés",
+      "status": "done",
+      "proof": "Clients HTTP réels Wave/MoMo/OM/CinetPay/PayPal (vault chiffré) ; DEFERRED_AWAITING_CREDENTIALS affiché (E2E) ; règlement uniquement sur statut re-vérifié provider"
+    },
+    {
+      "id": "S5.gates",
+      "scope": "§13.5 Gates premium TIER_GATE_DENIED structuré + god-mode bypass + montants nuls + grille localisée",
+      "status": "done",
+      "proof": "gates.ts TIER_GATE_DENIED structuré + god-mode + montant nul granted + pending state ; Oracle gated (E2E seed payé) ; PDF intake gated 402"
+    },
+    {
+      "id": "S6.console",
+      "scope": "§13.6 Console : comptes/rôles/MFA, portefeuille marques, argent (file manuelle, factures, commissions, litiges, grille, relevés MCP), vault credentials, config, audit",
+      "status": "done",
+      "proof": "Console 7 rubriques : vue d'ensemble (stats réelles), portefeuille+détail marque (édition piliers via ?marque=, même point d'écriture — E2E), argent (file manuelle E2E), comptes+rôles audités, vault chiffré CRUD (E2E cycle set/delete), config grille+settings (E2E), audit filtrable. Litiges/commissions/relevés MCP arrivent avec S7/S10 (tables prêtes, requêtes vides honnêtes)."
+    },
+    {
+      "id": "S7.guild",
+      "scope": "§13.7 Guilde : mur public, fiches slug, dépôt (marque shell), inscriptions talent/agence, modération, candidatures, devis",
+      "status": "done",
+      "proof": "E2E complet vert : dépôt public (marque shell, contact protégé) → invisible avant modération → publication ops → candidature talent avec devis structuré multi-postes → arbitrage (retenir/présélection/refus, jamais 1er-arrivé) → mission ASSIGNED + Earning 25% Compagnon + notification talent. Inscriptions talent (E2E) et agence publiques. Assist LLM du brief branché en X.llm."
+    },
+    {
+      "id": "S8.notifications",
+      "scope": "§13.8 SSE unique (heartbeat, ?since=) + push VAPID opt-in + email cascade Resend→Mailgun→SendGrid + digest hebdo + crons HTTP CRON_SECRET",
+      "status": "done",
+      "proof": "SSE unique /api/sse (heartbeat 25s, ?since= rejoué depuis la DB, X-Accel-Buffering:no) + cloche temps réel — E2E 2 contextes : validation ops → badge cliente sans reload. Email cascade Resend→Mailgun→SendGrid (vault, DEFERRED tracé — digest sent:2 vérifié). Digest hebdo + expiration abonnements + signaux en crons HTTP CRON_SECRET fail-closed (E2E 401/503). Push VAPID opt-in (sw.js, /api/push/subscribe, prefs Réglages). RGPD export JSON + suppression anonymisée."
+    },
+    {
+      "id": "S9.intelligence",
+      "scope": "§13.9 Snapshots + feeds réels (World Bank, RSS Google News) + Devotion Ladder + Cult Index + radar Overton heuristique (DEGRADED/INSUFFICIENT_DATA) + journal coûts LLM",
+      "status": "done",
+      "proof": "measures.ts pur (cultIndex pondéré null-honnête, devotion, radar 4 axes OK/DEGRADED/INSUFFICIENT_DATA avec basis) partagé Oracle s31 (implémentation unique) — 9 tests unitaires. /cockpit/intelligence gated abonnement (TIER_GATE_DENIED + upgrade path — E2E), recensement manual-first (chaque mutation → BrandSnapshot cultIndex/devotion/followers), sparkline trajectoire, veille RSS/World Bank (cron signals) + saisie terrain (E2E). Journal coûts LLM (LlmCall) arrive avec X.llm (table prête)."
+    },
+    {
+      "id": "S9.assets",
+      "scope": "§13.9 Vault d'assets + forge de base (kinds v1, déterministe d'abord, LLM optionnel, lifecycle+staleAt)",
+      "status": "done",
+      "proof": "Forge déterministe composers.ts : 6 kinds réellement exposés UI (POSITIONING/MANIFESTO/CLAIM/PITCH/PERSONA/CREATIVE_BRIEF+objectif), interface unique forgeAsset (sortie validée Zod), trous explicites [À compléter] jamais inventés (tests unitaires + E2E). Vault /cockpit/livrables : lifecycle DRAFT→ACTIVE→SUPERSEDED/ARCHIVED, staleAt posé par amendPillar (E2E : forge → activation → amendement ADVE → Périmé), détail asset + édition manuelle (manual-first, E2E), reforge, audit. Amélioration LLM = X.llm."
+    },
+    {
+      "id": "S10.creator",
+      "scope": "§13.10 Espace Creator mince : profil, missions, devis, earnings",
+      "status": "done",
+      "proof": "/creator : tuiles (missions ouvertes/candidatures/gains), missions actives (assignedTalentId), candidatures avec devis structuré, relevé de commissions (brut/taux tier/net, statuts). /creator/profil éditable (manual-first, upsert TalentProfile, alimente l'annuaire+matching). E2E espaces.spec vert (blocs §4.5 + édition répercutée + devis 450 000 FCFA seedé)."
+    },
+    {
+      "id": "S10.agency",
+      "scope": "§13.10 Espace Agency mince : marques clientes + score moyen, missions, commissions",
+      "status": "done",
+      "proof": "/agency : marques clientes (founder délégué) + score ADVE moyen, missions du périmètre (déposées par contactEmail OU liées aux marques clientes) avec statuts, commissions (Earning) — états vides honnêtes et explicatifs, CTA réels (déposer une mission). E2E vert."
+    },
+    {
+      "id": "S10.mcp",
+      "scope": "§13.10 MCP facturable : endpoint unique, clés hashées affichées une fois, comptage, relevés gelés",
+      "status": "done",
+      "proof": "UN endpoint /api/mcp (JSON-RPC 2.0 Streamable HTTP sans état : initialize/ping/tools/list/tools/call) ; 4 outils lecture réelle scopés au porteur (list_brands, get_brand, get_score_history, list_missions publiques). Clés SHA-256 (clair montré une fois — E2E), révocation, comptage McpCall (échecs non facturés), gate abonnement structuré sur tools/call. Relevés mensuels gelés (cron statements, unique keyId+periodStart, prix setting mcp.call_price) visibles Réglages + Console argent ; encaissement par le rail Payment réel (settlePayment → facture, audit). E2E mcp.spec 3/3 : cycle complet clé→appels→comptage→gel→encaissement Réglé + TIER_GATE_DENIED."
+    },
+    {
+      "id": "X.llm",
+      "scope": "§9 Gateway LLM multi-provider fallback (Anthropic→OpenAI→Ollama→OpenRouter), Zod+retry, tous usages optionnels avec équivalent manuel",
+      "status": "done",
+      "proof": "Gateway fetch pur (zéro SDK) : chaîne LLM_PRIMARY_PROVIDER→fallback, sortie Zod + 1 retry avec erreur explicitée (jamais de coercition), journal LlmCall (Console audit : par usage + 20 derniers) — 6 tests unitaires fetch simulé (indisponible/fallback/réordre/retry/échec persistant/extractJson). 5 usages branchés, tous optionnels (llmAvailable) : intake prefill (champs non-inférables exclus par construction, soumis tel quel ⇒ INFERRED « à valider » via llmPrefill), reformulation ADVE 2 modes en PREVIEW (écriture = saveFieldAction humain), Oracle 22–35 Enrichir (snapshot gelé, déterministe intact en échec, badge Enrichie IA), asset Améliorer (nouveau DRAFT llmUsed, original intact), brief Guilde structuré (relu puis soumis, mission.llmAssisted). E2E llm.spec 3/3 : zéro clé ⇒ zéro façade IA, déterministe entier — banc 28/28."
+    },
+    {
+      "id": "P3.hardening",
+      "scope": "Phase 3 : responsive/a11y/i18n base, .env.example exhaustif, Dockerfile+standalone+pm2 vérifiés, README 5min, purge code mort, audit DoD ligne par ligne",
+      "status": "done",
+      "proof": "Dockerfile multi-stage (migrate au boot, CLI prisma isolée /opt) + pm2 (instances:1, vérifié online) + README install 5 min ; build:standalone recette unique (bench/CI/pm2) ; layout runner assemblé à l'identique et exécuté (migrate + 200 sur /,/tarifs,/blog). Purge : 5 morts supprimés + ~20 exports refermés (knip) + config fantôme BLOB_STORAGE retirée. 3 audits à contexte frais → tous les constats réels corrigés (voir _build/DOD-AUDIT.md §8) : CRITIQUE Orange Money (relecture serveur→serveur + export RGPD durci), HAUTE god-mode (élévation gatée emailVerified), 4 tables orphelines dotées de surfaces réelles (Opérations cockpit : BrandAction+BrandRequest ; Console argent : Dispute+EmailLog), seed admin password durci, timingSafeEqual cron, témoignages démo étiquetés. Banc final 30/30 E2E + 37/37 unitaires. DOD-AUDIT.md ligne par ligne."
+    },
+    {
+      "id": "OP.deploy-coolify",
+      "scope": "Demande opérateur (chat 2026-07-05) : déployer sur Coolify en fin de mission (app + Postgres + env) — credentials hors repo",
+      "status": "done",
+      "proof": "LIVE et VÉRIFIÉ le 2026-07-06 → https://lafuseev8.powerupgraders.com. Déblocage infra : rotation clé SSH ed25519 'coolify' + docker restart du control plane (file Horizon morte depuis le reboot serveur du 01/07) ; serveurs revalidés reachable <10 s. App lafusee-v8 (projet lafusee, GitHub App average-ant, Dockerfile, port 3000, wildcard DNS + Let's Encrypt) ; Postgres 16 dédié running:healthy ; 5 env runtime-only ; 4 crons in-container. Migrations au boot OK, seed idempotent exécuté (opérateur UPgraders, 5 marques, 22 pays, 28 règles prix, comptes démo). Vérif E2E : /,/tarifs,/statut,/diagnostic,/connexion,/blog,/realisations → 200 ; login admin god-mode → session ADMIN+OPERATOR (HTTP 302 + cookie). Fix build découvert au passage : c22d638 (placeholders d'env au build — next build importe la config NextAuth qui appelle env() au niveau module ; la CI le masquait). PR #2 (CI verte). L'app déploie temporairement la branche du fix ; rebascule sur la branche par défaut documentée post-merge (_build/DEPLOY-COOLIFY.md)."
+    },
+    {
+      "id": "OUT.broadcast",
+      "scope": "Broadcast publicitaire (Meta/Google/X/TikTok) + SMS",
+      "status": "out",
+      "proof": "cahier §7 : façades v1 non câblées, ne pas reconstruire"
+    },
+    {
+      "id": "OUT.argos",
+      "scope": "Argos vitrine média",
+      "status": "out",
+      "proof": "cahier §4.6 : v2.1, route réservée"
+    },
+    {
+      "id": "OUT.divers",
+      "scope": "Académie/QC pair/communauté creator, arbre FMCG multi-niveaux, escrow auto, embeddings/ML, Redis/multi-pod, app mobile, GraphQL",
+      "status": "out",
+      "proof": "cahier §13 OUT explicite"
+    }
   ]
 }

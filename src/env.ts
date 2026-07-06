@@ -21,20 +21,22 @@ const schema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   MANUAL_PAYMENT_WHATSAPP_NUMBER: z.string().optional(),
+  // Email de contact public (façade contact). Vide ⇒ « non configuré » affiché.
+  CONTACT_EMAIL: z.string().email().optional(),
 
   // LLM (tous optionnels — l'app fonctionne sans)
   LLM_PRIMARY_PROVIDER: z.enum(["anthropic", "openai", "ollama", "openrouter"]).optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   OPENAI_API_KEY: z.string().optional(),
+  // Base OpenAI-compatible (défaut api.openai.com) : vise tout endpoint compatible —
+  // Ollama Cloud (https://ollama.com/v1), Together, Groq, vLLM local…
+  OPENAI_BASE_URL: z.string().url().optional(),
   OLLAMA_BASE_URL: z.string().optional(),
   OPENROUTER_API_KEY: z.string().optional(),
   LLM_MODEL: z.string().optional(),
 
   // Crons HTTP
   CRON_SECRET: z.string().optional(),
-
-  // Stockage fichiers (fallback : local/base64)
-  BLOB_STORAGE_PUT_URL_TEMPLATE: z.string().optional(),
 
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
