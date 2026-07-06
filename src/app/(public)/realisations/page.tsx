@@ -36,6 +36,16 @@ export default async function RealisationsPage() {
         marque : son score actuel et son point de départ, calculés par le même moteur déterministe
         que le vôtre.
       </p>
+      <div className="mt-8 overflow-hidden rounded-(--radius-md) border border-line shadow-sm">
+        <img
+          src="/images/roaster.webp"
+          alt="Artisan torréfacteur d'une marque créative africaine, gros plan sur les grains fraîchement torréfiés"
+          width={1100}
+          height={738}
+          className="h-56 w-full object-cover md:h-72"
+          loading="lazy"
+        />
+      </div>
       <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {brands.map((b) => {
           const first = b.snapshots[0];
