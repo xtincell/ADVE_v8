@@ -22,7 +22,7 @@ function pillarDefName(kind: PillarKind): string {
 // Toute autre écriture de Pillar.fields dans le code est un bug.
 // ═══════════════════════════════════════════════════════════════════
 
-export interface FieldChange {
+interface FieldChange {
   value: FieldValue;
   /** défaut : DECLARED (saisie humaine). INFERRED réservé aux pré-remplissages IA. */
   certainty?: Certainty;

@@ -49,7 +49,7 @@ export function cultIndex(devotion: Devotion): { value: number; sample: number }
 
 // ── Radar de fenêtre d'Overton (heuristique paramétrique — cahier §8) ──
 
-export type AxisStatus = "OK" | "DEGRADED" | "INSUFFICIENT_DATA";
+type AxisStatus = "OK" | "DEGRADED" | "INSUFFICIENT_DATA";
 
 export interface OvertonAxis {
   key: string;

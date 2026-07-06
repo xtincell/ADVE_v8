@@ -8,7 +8,6 @@ import { PILLARS, pillarDef, type FieldValue, type PillarFields } from "@/server
 // ═══════════════════════════════════════════════════════════════════
 
 export const PILLAR_MAX = 25;
-export const COMPOSITE_MAX = 200;
 
 /** Multiplicateur de certitude : une donnée inférée non validée vaut moins qu'une donnée déclarée. */
 const CERTAINTY_FACTOR: Record<Certainty, number> = {

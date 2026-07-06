@@ -3,7 +3,7 @@ import { cn } from "@/lib/cn";
 // Marque visuelle — placeholder propre (assets v1 indisponibles, cf. journal de build).
 // Le glyphe fusée et les wordmarks sont dessinés en SVG/typo locales.
 
-export function RocketMark({ className, size = 28 }: { className?: string; size?: number }) {
+function RocketMark({ className, size = 28 }: { className?: string; size?: number }) {
   return (
     <svg
       width={size}

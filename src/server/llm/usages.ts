@@ -2,7 +2,7 @@ import "server-only";
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
 import { db } from "@/server/db";
-import { asPillarFields, nonInferableFields, pillarDef } from "@/server/brands/pillar-config";
+import { asPillarFields, pillarDef } from "@/server/brands/pillar-config";
 import type { FrozenPillars } from "@/server/oracle/context";
 import { sectionDef } from "@/server/oracle/sections";
 import { assetContentSchema } from "@/server/assets";
@@ -237,5 +237,3 @@ export async function draftMission(rawDescription: string): Promise<MissionDraft
   });
 }
 
-/** Rappel doctrine : les champs jamais pré-remplis par l'IA. */
-export { nonInferableFields };

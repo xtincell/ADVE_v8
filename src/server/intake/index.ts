@@ -58,7 +58,7 @@ export type DraftPillars = Partial<Record<PillarKind, PillarFields>>;
  * Un champ pré-rempli par l'IA et soumis TEL QUEL reste INFERRED (badge « À
  * valider » au cockpit) ; dès que l'humain l'a retouché, il devient DECLARED.
  */
-export function draftFromAnswers(
+function draftFromAnswers(
   answers: Partial<IntakeAnswers>,
   llmPrefill?: Partial<Record<string, string | string[]>> | null,
 ): DraftPillars {
@@ -95,7 +95,7 @@ function normalize(v: string | string[]): string | string[] {
 }
 
 /** Score d'une ébauche (ADVE seul — les RTIS naissent dans le cockpit). */
-export function scoreDraft(draft: DraftPillars): { composite: number; perPillar: Record<string, number> } {
+function scoreDraft(draft: DraftPillars): { composite: number; perPillar: Record<string, number> } {
   const perPillar: Partial<Record<PillarKind, number>> = {};
   for (const kind of ADVE_KINDS) {
     perPillar[kind] = scorePillar(kind, draft[kind] ?? {});

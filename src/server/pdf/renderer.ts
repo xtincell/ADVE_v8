@@ -6,7 +6,7 @@ import type { Block } from "@/server/oracle/blocks";
 // Moteur de rendu PDF partagé (pile UNIQUE du produit — cahier §5.1) : PDFKit,
 // zéro Chromium. Rend le même modèle de blocs que le web.
 
-export const FONTS = path.join(process.cwd(), "src", "assets", "fonts");
+const FONTS = path.join(process.cwd(), "src", "assets", "fonts");
 export const CORAIL = "#E56458";
 export const NOIR = "#16130f";
 export const MUTED = "#57503f";
@@ -29,7 +29,7 @@ export function contentWidth(doc: Doc): number {
   return doc.page.width - M * 2;
 }
 
-export function ensureSpace(doc: Doc, needed: number) {
+function ensureSpace(doc: Doc, needed: number) {
   if (doc.y + needed > doc.page.height - M - 24) doc.addPage();
 }
 

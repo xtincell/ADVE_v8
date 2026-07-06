@@ -33,9 +33,6 @@ const schema = z.object({
   // Crons HTTP
   CRON_SECRET: z.string().optional(),
 
-  // Stockage fichiers (fallback : local/base64)
-  BLOB_STORAGE_PUT_URL_TEMPLATE: z.string().optional(),
-
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
 });
 

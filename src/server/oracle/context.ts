@@ -1,5 +1,5 @@
 import type { Brand, BrandAsset, CommunityMember, MarketSignal, PillarKind } from "@prisma/client";
-import { pillarDef, type FieldValue, type PillarFields } from "@/server/brands/pillar-config";
+import { pillarDef, type PillarFields } from "@/server/brands/pillar-config";
 import { structuralCompleteness } from "@/server/scoring/score";
 
 // Contexte de composition Oracle : le snapshot GELÉ des piliers au moment de la
@@ -40,7 +40,7 @@ export function has(ctx: OracleContext, kind: PillarKind, key: string): boolean 
   return !!state && structuralCompleteness(state.value) > 0;
 }
 
-export function completenessOf(ctx: OracleContext, kind: PillarKind, key: string): number {
+function completenessOf(ctx: OracleContext, kind: PillarKind, key: string): number {
   const state = ctx.pillars[kind]?.[key];
   return state ? structuralCompleteness(state.value) : 0;
 }
@@ -77,7 +77,3 @@ export function devotionDistribution(ctx: OracleContext): Record<string, number>
   return dist;
 }
 
-/** Valeur brute (pour geler dans le rapport). */
-export function raw(ctx: OracleContext, kind: PillarKind, key: string): FieldValue | null {
-  return ctx.pillars[kind]?.[key]?.value ?? null;
-}

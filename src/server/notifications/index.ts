@@ -39,22 +39,3 @@ export async function notify(input: NotifyInput): Promise<void> {
   void sendWebPush(input.userId, { title: input.title, body: input.body, href: input.href }).catch(() => {});
 }
 
-/** Republie en SSE une notification déjà écrite en base (créée dans une transaction). */
-export function republish(row: {
-  id: string;
-  userId: string;
-  type: string;
-  title: string;
-  body: string | null;
-  href: string | null;
-  createdAt: Date;
-}): void {
-  publish(row.userId, {
-    id: row.id,
-    type: row.type,
-    title: row.title,
-    body: row.body,
-    href: row.href,
-    createdAt: row.createdAt.toISOString(),
-  });
-}

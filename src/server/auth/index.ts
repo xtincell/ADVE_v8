@@ -14,12 +14,12 @@ import { decrypt } from "@/server/vault/crypto";
 // MFA TOTP pour ADMIN (vérifié au login dès qu'enrôlé).
 
 /** Le compte exige un code TOTP (MFA enrôlé) — le formulaire de connexion révèle le champ code. */
-export class MfaRequiredError extends CredentialsSignin {
+class MfaRequiredError extends CredentialsSignin {
   code = "mfa_required";
 }
 
 /** Code TOTP fourni mais invalide. */
-export class MfaInvalidError extends CredentialsSignin {
+class MfaInvalidError extends CredentialsSignin {
   code = "mfa_invalid";
 }
 

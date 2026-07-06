@@ -3,7 +3,7 @@ import localFont from "next/font/local";
 // Identité UPgraders (cahier §10) : Clash Display (display), Satoshi (texte),
 // JetBrains Mono (données). OTF/TTF auto-hébergées — un seul format servant
 // le web (next/font) ET l'embed PDF (PDFKit).
-export const clashDisplay = localFont({
+const clashDisplay = localFont({
   src: [
     { path: "../assets/fonts/ClashDisplay-Regular.otf", weight: "400" },
     { path: "../assets/fonts/ClashDisplay-Medium.otf", weight: "500" },
@@ -14,7 +14,7 @@ export const clashDisplay = localFont({
   display: "swap",
 });
 
-export const satoshi = localFont({
+const satoshi = localFont({
   src: [
     { path: "../assets/fonts/Satoshi-Regular.otf", weight: "400" },
     { path: "../assets/fonts/Satoshi-Medium.otf", weight: "500" },
@@ -25,7 +25,7 @@ export const satoshi = localFont({
   display: "swap",
 });
 
-export const jetbrainsMono = localFont({
+const jetbrainsMono = localFont({
   src: [
     { path: "../assets/fonts/JetBrainsMono-Regular.ttf", weight: "400" },
     { path: "../assets/fonts/JetBrainsMono-Bold.ttf", weight: "700" },

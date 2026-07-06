@@ -7,7 +7,7 @@ import { getSetting } from "@/server/settings";
 // et figé (unique keyId+periodStart → idempotent). Le règlement passe par les
 // rails de paiement existants (validation manuelle Console).
 
-export const DEFAULT_CALL_PRICE = { amount: 100, currency: "XOF" }; // surchargé par le setting mcp.call_price
+const DEFAULT_CALL_PRICE = { amount: 100, currency: "XOF" }; // surchargé par le setting mcp.call_price
 
 /**
  * Gèle les relevés du mois PRÉCÉDANT `reference` (par défaut : maintenant).

@@ -41,6 +41,3 @@ export function publish(userId: string, event: SseEvent): void {
   }
 }
 
-export function connectedUsers(): number {
-  return clients.size;
-}

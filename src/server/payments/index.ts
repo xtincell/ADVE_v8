@@ -12,7 +12,7 @@ import type { CheckoutResult, PaymentProviderAdapter, ProviderAvailability } fro
 // Routing provider par pays (cahier §6.1) : mobile money d'abord (le rail roi),
 // carte ensuite, manuel WhatsApp toujours. Chaque provider expose son état réel.
 
-export const ADAPTERS: Record<PaymentProvider, PaymentProviderAdapter> = {
+const ADAPTERS: Record<PaymentProvider, PaymentProviderAdapter> = {
   STRIPE: stripeAdapter,
   WAVE: waveAdapter,
   MTN_MOMO: momoAdapter,

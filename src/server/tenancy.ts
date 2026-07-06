@@ -6,7 +6,7 @@ import { db } from "@/server/db";
 // v2.0 opère un tenant principal (UPgraders, seedé) ; l'architecture reste multi-tenant
 // (operatorId partout, résolution centralisée ici — un sélecteur d'opérateur se brancherait ici).
 
-export const DEFAULT_OPERATOR_SLUG = "upgraders";
+const DEFAULT_OPERATOR_SLUG = "upgraders";
 
 /** Opérateur par défaut de l'installation. Cache par requête (React cache). */
 export const getDefaultOperator = cache(async () => {
@@ -19,9 +19,3 @@ export const getDefaultOperator = cache(async () => {
   return op;
 });
 
-/** Garde-fou : vérifie qu'une entité appartient bien au tenant courant. */
-export function assertTenant(entity: { operatorId: string | null } | null, operatorId: string, what = "ressource"): void {
-  if (!entity || entity.operatorId !== operatorId) {
-    throw new Error(`Accès refusé : ${what} hors du tenant courant.`);
-  }
-}

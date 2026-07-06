@@ -16,9 +16,7 @@ npm run db:seed
 
 echo "── Build standalone"
 rm -rf .next
-npm run build >/dev/null
-cp -r .next/static .next/standalone/.next/static
-if [ -d public ]; then cp -r public .next/standalone/public; fi
+npm run build:standalone >/dev/null
 
 echo "── E2E (standalone)"
 export CRON_SECRET="${CRON_SECRET:-e2e-cron-secret}"

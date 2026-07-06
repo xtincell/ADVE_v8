@@ -22,7 +22,7 @@ export function isExposedKind(kind: string): kind is AssetKind {
 }
 
 /** Contexte de composition depuis les piliers ADVE actuels de la marque. */
-export async function buildComposeContext(brandId: string): Promise<ComposeContext> {
+async function buildComposeContext(brandId: string): Promise<ComposeContext> {
   const brand = await db.brand.findUniqueOrThrow({ where: { id: brandId } });
   const pillars = await db.pillar.findMany({
     where: { brandId, kind: { in: ["AUTHENTICITE", "DISTINCTION", "VALEUR", "ENGAGEMENT"] } },

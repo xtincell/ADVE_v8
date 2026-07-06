@@ -16,7 +16,7 @@ export interface LocalizedPrice {
 
 const ZONE_FALLBACK = "UEMOA";
 
-export async function zoneForCountry(countryCode: string | null | undefined): Promise<string> {
+async function zoneForCountry(countryCode: string | null | undefined): Promise<string> {
   if (!countryCode) return ZONE_FALLBACK;
   const country = await db.country.findUnique({ where: { code: countryCode.toUpperCase() } });
   return country?.zone ?? "OTHER";

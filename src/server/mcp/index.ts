@@ -12,7 +12,7 @@ import type { SessionUser } from "@/server/auth/guards";
 
 const KEY_PREFIX = "fusee_mcp_";
 
-export function hashKey(plaintext: string): string {
+function hashKey(plaintext: string): string {
   return createHash("sha256").update(plaintext).digest("hex");
 }
 

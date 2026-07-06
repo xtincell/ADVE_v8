@@ -6,7 +6,7 @@ import { Field, FieldError, FieldHint, Input, Label, Select, Textarea } from "@/
 import type { IntakeAnswers } from "@/server/intake";
 import { prefillDiagnosticAction, saveDiagnosticStep, submitDiagnostic } from "../actions";
 
-export const SECTORS = [
+const SECTORS = [
   "Mode",
   "Food & boissons",
   "Musique",

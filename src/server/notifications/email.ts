@@ -22,7 +22,7 @@ interface TemplateDef {
 
 const FOOTER = "\n\n— La Fusée by UPgraders · De la poussière à l'étoile";
 
-export const EMAIL_TEMPLATES: Record<EmailTemplate, TemplateDef> = {
+const EMAIL_TEMPLATES: Record<EmailTemplate, TemplateDef> = {
   bienvenue: {
     subject: () => "Bienvenue dans votre Cockpit La Fusée",
     text: (d) =>
