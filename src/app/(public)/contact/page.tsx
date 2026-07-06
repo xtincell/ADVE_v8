@@ -11,6 +11,7 @@ export const metadata: Metadata = {
 
 export default function ContactPage() {
   const whatsapp = env().MANUAL_PAYMENT_WHATSAPP_NUMBER;
+  const email = env().CONTACT_EMAIL;
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-14">
@@ -47,9 +48,15 @@ export default function ContactPage() {
           <CardContent className="pt-5">
             <h2 className="font-display text-lg font-semibold">Email</h2>
             <p className="mt-2 text-sm text-ink-muted">Pour les sujets qui méritent une trace écrite.</p>
-            <a href="mailto:alexandre@upgraders.com" className={buttonClass({ variant: "outline", className: "mt-4" })}>
-              alexandre@upgraders.com
-            </a>
+            {email ? (
+              <a href={`mailto:${email}`} className={buttonClass({ variant: "outline", className: "mt-4" })}>
+                {email}
+              </a>
+            ) : (
+              <p className="mt-2 rounded-(--radius-sm) bg-surface-sunken px-3 py-2 font-mono text-xs text-ink-muted">
+                EMAIL NON CONFIGURÉ — l&apos;opérateur doit définir CONTACT_EMAIL.
+              </p>
+            )}
           </CardContent>
         </Card>
       </div>

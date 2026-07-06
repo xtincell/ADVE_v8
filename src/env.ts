@@ -21,6 +21,8 @@ const schema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   MANUAL_PAYMENT_WHATSAPP_NUMBER: z.string().optional(),
+  // Email de contact public (façade contact). Vide ⇒ « non configuré » affiché.
+  CONTACT_EMAIL: z.string().email().optional(),
 
   // LLM (tous optionnels — l'app fonctionne sans)
   LLM_PRIMARY_PROVIDER: z.enum(["anthropic", "openai", "ollama", "openrouter"]).optional(),
