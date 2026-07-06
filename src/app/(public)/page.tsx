@@ -232,23 +232,39 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      {/* ── PREUVE · une seule citation, en grand ──────────────────────────── */}
+      {/* ── PREUVE · portrait réel + citation (langage du hero) ─────────────── */}
       <section className="border-t border-line py-24 lg:py-32">
         <div className="mx-auto max-w-[1400px] px-5 lg:px-8">
-          <Reveal className="mx-auto max-w-4xl">
-            <Badge variant="outline" className="mb-8">Univers de démonstration</Badge>
-            <blockquote className="font-display text-3xl font-medium leading-tight tracking-tight md:text-4xl">
-              « J&apos;ai enfin une réponse à &quot;où en est ma marque ?&quot; qui n&apos;est pas une
-              opinion. Le score bouge quand je travaille. »
-            </blockquote>
-            <div className="mt-8 flex flex-wrap items-baseline gap-x-3">
-              <p className="font-medium">Awa Cissé</p>
-              <p className="text-sm text-ink-muted">Fondatrice de Nyama Café, Dakar</p>
+          <Reveal className="grid items-center gap-10 lg:grid-cols-12 lg:gap-14">
+            <div className="lg:col-span-5">
+              <div className="relative overflow-hidden rounded-[2rem] border border-line/70 shadow-[0_40px_120px_-40px_rgba(229,100,88,0.45)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/awa-cisse.webp"
+                  alt="Awa Cissé, fondatrice de Nyama Café à Dakar, dans sa torréfaction"
+                  width={900}
+                  height={1117}
+                  className="aspect-[4/5] w-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-surface/50 via-transparent to-transparent" aria-hidden />
+              </div>
             </div>
-            <p className="mt-8 max-w-2xl border-l-2 border-line pl-4 text-sm text-ink-muted">
-              Nyama Café et sa guilde peuplent notre univers de démonstration, le même que celui des
-              comptes de test. Les verbatims clients réels prendront leur place ici.
-            </p>
+            <div className="lg:col-span-7">
+              <Badge variant="outline" className="mb-8">Univers de démonstration</Badge>
+              <blockquote className="font-display text-3xl font-medium leading-tight tracking-tight md:text-4xl">
+                « J&apos;ai enfin une réponse à &quot;où en est ma marque ?&quot; qui n&apos;est pas une
+                opinion. Le score bouge quand je travaille. »
+              </blockquote>
+              <div className="mt-8 flex flex-wrap items-baseline gap-x-3">
+                <p className="font-medium">Awa Cissé</p>
+                <p className="text-sm text-ink-muted">Fondatrice de Nyama Café, Dakar</p>
+              </div>
+              <p className="mt-8 max-w-xl border-l-2 border-line pl-4 text-sm text-ink-muted">
+                Nyama Café et sa guilde peuplent notre univers de démonstration, le même que celui des
+                comptes de test. Les verbatims clients réels prendront leur place ici.
+              </p>
+            </div>
           </Reveal>
         </div>
       </section>
