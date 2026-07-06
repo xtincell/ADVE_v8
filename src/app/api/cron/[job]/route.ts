@@ -4,6 +4,7 @@ import { db } from "@/server/db";
 import { sendEmail } from "@/server/notifications/email";
 import { notify } from "@/server/notifications";
 import { refreshMarketSignals } from "@/server/intelligence/feeds";
+import { freezeMonthlyStatements } from "@/server/mcp/statements";
 
 // Crons = simples endpoints HTTP (cahier §7) déclenchés par n'importe quel
 // scheduler externe (GitHub Actions, cron système, Coolify…). AUCUN scheduler
@@ -92,8 +93,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ job: str
       case "signals":
         result = await runSignals();
         break;
+      case "statements": {
+        // Gèle le mois précédant `ref` (défaut : maintenant). `ref` permet le
+        // rattrapage de mois passés — toujours des périodes calendaires closes.
+        const ref = new URL(req.url).searchParams.get("ref");
+        result = await freezeMonthlyStatements(ref ? new Date(ref) : undefined);
+        break;
+      }
       default:
-        return NextResponse.json({ error: "JOB_INCONNU", jobs: ["digest", "subscriptions", "signals"] }, { status: 404 });
+        return NextResponse.json(
+          { error: "JOB_INCONNU", jobs: ["digest", "subscriptions", "signals", "statements"] },
+          { status: 404 },
+        );
     }
     return NextResponse.json({ job, ok: true, durationMs: Date.now() - startedAt, result });
   } catch (e) {

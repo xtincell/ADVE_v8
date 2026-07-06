@@ -148,20 +148,20 @@
     {
       "id": "S10.creator",
       "scope": "§13.10 Espace Creator mince : profil, missions, devis, earnings",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "/creator : tuiles (missions ouvertes/candidatures/gains), missions actives (assignedTalentId), candidatures avec devis structuré, relevé de commissions (brut/taux tier/net, statuts). /creator/profil éditable (manual-first, upsert TalentProfile, alimente l'annuaire+matching). E2E espaces.spec vert (blocs §4.5 + édition répercutée + devis 450 000 FCFA seedé)."
     },
     {
       "id": "S10.agency",
       "scope": "§13.10 Espace Agency mince : marques clientes + score moyen, missions, commissions",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "/agency : marques clientes (founder délégué) + score ADVE moyen, missions du périmètre (déposées par contactEmail OU liées aux marques clientes) avec statuts, commissions (Earning) — états vides honnêtes et explicatifs, CTA réels (déposer une mission). E2E vert."
     },
     {
       "id": "S10.mcp",
       "scope": "§13.10 MCP facturable : endpoint unique, clés hashées affichées une fois, comptage, relevés gelés",
-      "status": "pending",
-      "proof": ""
+      "status": "done",
+      "proof": "UN endpoint /api/mcp (JSON-RPC 2.0 Streamable HTTP sans état : initialize/ping/tools/list/tools/call) ; 4 outils lecture réelle scopés au porteur (list_brands, get_brand, get_score_history, list_missions publiques). Clés SHA-256 (clair montré une fois — E2E), révocation, comptage McpCall (échecs non facturés), gate abonnement structuré sur tools/call. Relevés mensuels gelés (cron statements, unique keyId+periodStart, prix setting mcp.call_price) visibles Réglages + Console argent ; encaissement par le rail Payment réel (settlePayment → facture, audit). E2E mcp.spec 3/3 : cycle complet clé→appels→comptage→gel→encaissement Réglé + TIER_GATE_DENIED."
     },
     {
       "id": "X.llm",

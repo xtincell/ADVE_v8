@@ -20,6 +20,8 @@ export interface SettleInput {
   /** Fin de période fournie par le provider (Stripe) — sinon durée manuelle (30 j). */
   periodEnd?: Date;
   validatedById?: string | null;
+  /** Libellé de ligne de facture — par défaut le tier du paiement. */
+  invoiceLabel?: string;
 }
 
 export async function settlePayment(input: SettleInput): Promise<{ alreadySettled: boolean }> {
@@ -83,7 +85,9 @@ export async function settlePayment(input: SettleInput): Promise<{ alreadySettle
         paymentId: payment.id,
         toName: user?.name ?? intake?.brandName ?? "Client",
         toEmail: user?.email ?? intake?.email ?? "",
-        lines: [{ label: `La Fusée — ${payment.tier ?? "paiement"}`, amount: payment.amount }] as Prisma.InputJsonValue,
+        lines: [
+          { label: input.invoiceLabel ?? `La Fusée — ${payment.tier ?? "paiement"}`, amount: payment.amount },
+        ] as Prisma.InputJsonValue,
         amount: payment.amount,
         currency: payment.currency,
       },

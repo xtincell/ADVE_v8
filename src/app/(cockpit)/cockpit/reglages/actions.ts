@@ -7,10 +7,43 @@ import { db } from "@/server/db";
 import { audit } from "@/server/audit";
 import { requireUser } from "@/server/auth/guards";
 import { signOut } from "@/server/auth";
+import { checkSubscriptionGate } from "@/server/billing/gates";
+import { createApiKey, revokeApiKey } from "@/server/mcp";
 
 export interface ReglagesFormState {
   ok?: boolean;
   error?: string;
+}
+
+// ─────────────────────────────── Clés API MCP
+
+export interface McpKeyFormState {
+  error?: string;
+  /** Clair de la clé — présent UNE SEULE FOIS, jamais rejoué. */
+  plaintext?: string;
+}
+
+export async function createMcpKeyAction(_prev: McpKeyFormState, formData: FormData): Promise<McpKeyFormState> {
+  const user = await requireUser("/cockpit/reglages");
+  const gate = await checkSubscriptionGate(user);
+  if (!gate.allowed) {
+    return { error: gate.pending ? "Votre paiement attend la validation d'un opérateur." : "L'API MCP fait partie de l'abonnement Cockpit (TIER_GATE_DENIED)." };
+  }
+  const label = String(formData.get("label") ?? "").trim();
+  if (label.length < 3 || label.length > 60) return { error: "Nom de clé requis (3 à 60 caractères)." };
+  if (!user.operatorId) return { error: "Compte sans opérateur." };
+  const { plaintext } = await createApiKey({ id: user.id, email: user.email, operatorId: user.operatorId }, label);
+  revalidatePath("/cockpit/reglages");
+  return { plaintext };
+}
+
+export async function revokeMcpKeyAction(formData: FormData): Promise<void> {
+  const user = await requireUser("/cockpit/reglages");
+  const id = String(formData.get("id") ?? "");
+  const key = await db.mcpApiKey.findUnique({ where: { id } });
+  if (!key || key.userId !== user.id) return;
+  await revokeApiKey(id, { id: user.id, email: user.email });
+  revalidatePath("/cockpit/reglages");
 }
 
 const profileSchema = z.object({

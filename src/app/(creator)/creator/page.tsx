@@ -26,10 +26,19 @@ export default async function CreatorHome() {
     take: 5,
   });
   const openMissions = await db.mission.count({ where: { status: "PUBLISHED" } });
-  const earnings = await db.earning.aggregate({
-    where: { talentId: user.id, status: "PAID" },
-    _sum: { netAmount: true },
+  const activeMissions = await db.mission.findMany({
+    where: { assignedTalentId: user.id, status: { in: ["ASSIGNED", "COMPLETED"] } },
+    orderBy: { updatedAt: "desc" },
   });
+  const earnings = await db.earning.findMany({
+    where: { talentId: user.id },
+    include: { mission: { select: { title: true, slug: true } } },
+    orderBy: { createdAt: "desc" },
+    take: 10,
+  });
+  const paidTotal = earnings
+    .filter((e) => e.status === "PAID")
+    .reduce((s, e) => s + e.netAmount, 0);
 
   return (
     <div className="flex flex-col gap-6">
@@ -64,12 +73,75 @@ export default async function CreatorHome() {
         <Card>
           <CardContent className="pt-5">
             <p className="text-sm text-ink-muted">Gains perçus</p>
-            <p className="mt-1 font-mono text-3xl font-bold">
-              {formatMoney(earnings._sum.netAmount ?? 0, "XOF")}
-            </p>
+            <p className="mt-1 font-mono text-3xl font-bold">{formatMoney(paidTotal, "XOF")}</p>
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Missions actives</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {activeMissions.length === 0 ? (
+            <EmptyState
+              title="Aucune mission en cours"
+              description="Quand une candidature est retenue, la mission apparaît ici avec son avancement."
+            />
+          ) : (
+            <ul className="divide-y divide-line">
+              {activeMissions.map((m) => (
+                <li key={m.id} className="flex items-center justify-between gap-3 py-3">
+                  <div>
+                    <Link href={`/guilde/${m.slug}`} className="text-sm font-medium hover:text-accent">
+                      {m.title}
+                    </Link>
+                    <p className="font-mono text-xs text-ink-muted">
+                      {m.deadline
+                        ? `Échéance ${new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(m.deadline)}`
+                        : "Sans échéance"}
+                    </p>
+                  </div>
+                  <Badge variant={m.status === "COMPLETED" ? "success" : "accent"}>
+                    {m.status === "COMPLETED" ? "Terminée" : "En cours"}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Relevé de commissions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {earnings.length === 0 ? (
+            <EmptyState
+              title="Aucune commission"
+              description="Chaque mission attribuée génère une ligne : brut, commission à votre taux de tier, net."
+            />
+          ) : (
+            <ul className="divide-y divide-line">
+              {earnings.map((e) => (
+                <li key={e.id} className="flex flex-wrap items-center justify-between gap-2 py-2.5">
+                  <div>
+                    <p className="text-sm font-medium">{e.mission?.title ?? "Mission"}</p>
+                    <p className="font-mono text-xs text-ink-muted">
+                      Brut {formatMoney(e.grossAmount, e.currency)} · commission{" "}
+                      {Math.round(e.commissionRate * 100)} % · net {formatMoney(e.netAmount, e.currency)}
+                    </p>
+                  </div>
+                  <Badge variant={e.status === "PAID" ? "success" : e.status === "APPROVED" ? "info" : "neutral"}>
+                    {e.status === "PAID" ? "Payé" : e.status === "APPROVED" ? "Approuvé" : "En attente"}
+                  </Badge>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>

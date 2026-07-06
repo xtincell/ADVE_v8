@@ -7,7 +7,7 @@ import { requireAdminWithMfa } from "@/server/auth/guards";
 import { db } from "@/server/db";
 import { getDefaultOperator } from "@/server/tenancy";
 import { formatMoney, TIER_NAMES } from "@/server/billing/pricing";
-import { rejectManualPaymentAction, validateManualPaymentAction } from "./actions";
+import { rejectManualPaymentAction, settleMcpStatementAction, validateManualPaymentAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +25,12 @@ export default async function ConsoleArgentPage() {
     orderBy: { updatedAt: "desc" },
     take: 15,
     include: { user: true, invoice: true },
+  });
+  const mcpStatements = await db.mcpStatement.findMany({
+    where: { operatorId: operator.id },
+    orderBy: { periodStart: "desc" },
+    take: 24,
+    include: { key: { include: { user: { select: { email: true } } } } },
   });
 
   return (
@@ -73,6 +79,54 @@ export default async function ConsoleArgentPage() {
                         Rejeter
                       </Button>
                     </form>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Relevés MCP</CardTitle>
+          <CardDescription>
+            Usage de l&apos;API facturable, gelé par mois clos (cron <code className="font-mono text-xs">statements</code>).
+            L&apos;encaissement suit la même règle que le manuel : fonds effectivement reçus.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {mcpStatements.length === 0 ? (
+            <EmptyState
+              title="Aucun relevé gelé"
+              description="Les relevés apparaissent après le premier mois d'usage de l'API MCP (cron statements)."
+            />
+          ) : (
+            <ul className="divide-y divide-line">
+              {mcpStatements.map((s) => (
+                <li key={s.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div>
+                    <p className="text-sm font-medium">
+                      {s.periodStart.toISOString().slice(0, 7)} · {s.key.label}{" "}
+                      <span className="font-mono text-xs text-ink-faint">({s.key.prefix}…)</span>
+                    </p>
+                    <p className="font-mono text-xs text-ink-muted">
+                      {s.key.user?.email ?? "—"} · {s.callCount} appels · gelé le{" "}
+                      {new Intl.DateTimeFormat("fr-FR", { dateStyle: "medium" }).format(s.frozenAt)}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-sm font-bold">{formatMoney(s.amount, s.currency)}</span>
+                    {s.paymentId ? (
+                      <Badge variant="success">Réglé</Badge>
+                    ) : (
+                      <form action={settleMcpStatementAction}>
+                        <input type="hidden" name="statementId" value={s.id} />
+                        <Button type="submit" size="sm" variant="outline">
+                          Encaisser (fonds reçus)
+                        </Button>
+                      </form>
+                    )}
                   </div>
                 </li>
               ))}

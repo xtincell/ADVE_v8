@@ -5,6 +5,7 @@ import { requireRole } from "@/server/auth/guards";
 const NAV: NavItem[] = [
   { href: "/creator", label: "Mon espace", exact: true },
   { href: "/creator/missions", label: "Missions" },
+  { href: "/creator/profil", label: "Profil" },
 ];
 
 export default async function CreatorLayout({ children }: { children: React.ReactNode }) {
