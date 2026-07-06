@@ -13,13 +13,10 @@ import {
   UsersThree,
 } from "@phosphor-icons/react/dist/ssr";
 import { Badge } from "@/components/ui/badge";
-import { HeroBackground } from "@/components/public/hero-background";
 import { Reveal } from "@/components/public/reveal";
 import { getDefaultOperator } from "@/server/tenancy";
 import { priceFor } from "@/server/billing/pricing";
 import { PILLARS } from "@/server/brands/pillar-config";
-import { db } from "@/server/db";
-import { TIER_LABELS } from "@/server/scoring/score";
 
 export const dynamic = "force-dynamic";
 
@@ -30,10 +27,6 @@ const PILLAR_SPAN = ["lg:col-span-7", "lg:col-span-5", "lg:col-span-5", "lg:col-
 
 export default async function LandingPage() {
   const operator = await getDefaultOperator();
-  const canon = await db.brand.findUnique({
-    where: { operatorId_slug: { operatorId: operator.id, slug: "la-fusee" } },
-    select: { score: true, tier: true },
-  });
   const [pdf, cockpit, oracle] = await Promise.all([
     priceFor(operator.id, "INTAKE_PDF", "SN"),
     priceFor(operator.id, "COCKPIT_MONTHLY", "SN"),
@@ -48,22 +41,30 @@ export default async function LandingPage() {
 
   return (
     <>
-      {/* ── HERO · portrait éditorial + score flottant ─────────────────────── */}
-      <section className="relative isolate overflow-hidden">
-        <div className="hero-aurora absolute inset-0" aria-hidden />
-        <HeroBackground />
-        <div className="hero-vignette absolute inset-0" aria-hidden />
-        <div className="relative mx-auto grid min-h-[88dvh] max-w-[1400px] items-center gap-10 px-5 pt-16 pb-20 lg:grid-cols-12 lg:gap-6 lg:px-8">
-          <div className="lg:col-span-6 lg:pr-4">
+      {/* ── HERO · plein écran, image éditoriale, texte incrusté ───────────── */}
+      <section className="relative isolate flex min-h-[92dvh] items-center overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/images/hero-studio-1.webp"
+          alt="Directrice artistique de l'industrie créative africaine francophone dans son studio"
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-[72%_center]"
+          loading="eager"
+          fetchPriority="high"
+        />
+        {/* voiles : le titre reste lisible à gauche, le bas fond dans la page */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-surface via-surface/75 to-surface/5" aria-hidden />
+        <div className="absolute inset-x-0 bottom-0 -z-10 h-48 bg-gradient-to-t from-surface to-transparent" aria-hidden />
+        <div className="relative mx-auto w-full max-w-[1400px] px-5 py-24 lg:px-8">
+          <div className="max-w-2xl">
             <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-accent">
               UPgraders présente
             </p>
-            <h1 className="mt-6 font-display text-6xl font-semibold leading-[0.9] tracking-tight sm:text-7xl lg:text-8xl">
+            <h1 className="mt-6 font-display text-6xl font-semibold leading-[0.9] tracking-tight text-white sm:text-7xl lg:text-8xl">
               De la poussière
               <br />
               <span className="text-accent">à l&apos;étoile.</span>
             </h1>
-            <p className="mt-7 max-w-md text-lg leading-relaxed text-ink-muted">
+            <p className="mt-7 max-w-md text-lg leading-relaxed text-white/75">
               Le premier score de marque déterministe pour l&apos;industrie créative d&apos;Afrique
               francophone. Vous mesurez, vous progressez, vous devenez une icône.
             </p>
@@ -79,47 +80,10 @@ export default async function LandingPage() {
               </Link>
               <Link
                 href="/methode"
-                className="rounded-full border border-line-strong px-6 py-3 font-medium text-ink transition-colors duration-300 hover:border-accent hover:text-accent"
+                className="rounded-full border border-white/25 px-6 py-3 font-medium text-white transition-colors duration-300 hover:border-accent hover:text-accent"
               >
                 Découvrir la méthode
               </Link>
-            </div>
-          </div>
-          <div className="relative lg:col-span-6 lg:justify-self-end">
-            <div className="relative mx-auto w-full max-w-sm lg:max-w-md">
-              {/* halo chaud : la profondeur vient de la lumière, pas d'un cadre plat */}
-              <div
-                className="absolute -inset-8 -z-10 rounded-[3rem] bg-[radial-gradient(60%_55%_at_65%_35%,rgba(229,100,88,0.4),transparent_70%)] blur-2xl"
-                aria-hidden
-              />
-              <div className="relative overflow-hidden rounded-[2rem] border border-line/70 shadow-[0_50px_140px_-40px_rgba(229,100,88,0.5)]">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src="/images/hero-creative-2.webp"
-                  alt="Portrait d'une directrice artistique de l'industrie créative africaine francophone"
-                  width={1200}
-                  height={1490}
-                  className="aspect-[4/5] w-full object-cover"
-                  loading="eager"
-                  fetchPriority="high"
-                />
-                {/* fond du portrait fondu dans la page pour éviter la couture */}
-                <div className="absolute inset-0 bg-gradient-to-t from-surface via-surface/15 to-transparent" aria-hidden />
-                <div className="absolute inset-0 bg-gradient-to-r from-surface/45 to-transparent" aria-hidden />
-              </div>
-              {/* carte de score flottante : la métrique produit, concrète, posée sur l'image */}
-              <div className="absolute -bottom-6 -left-3 flex items-center gap-4 rounded-2xl border border-white/15 bg-black/55 px-5 py-4 shadow-[0_24px_60px_-18px_rgba(0,0,0,0.7)] backdrop-blur-md sm:-left-6">
-                <div>
-                  <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/55">Score de marque</p>
-                  <p className="mt-1 font-display text-3xl font-bold tabular-nums text-white">
-                    {canon?.score ?? 0}
-                    <span className="text-base font-medium text-white/45">/200</span>
-                  </p>
-                </div>
-                <span className="rounded-full bg-accent px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-accent-ink">
-                  {TIER_LABELS[canon?.tier ?? "LATENT"]}
-                </span>
-              </div>
             </div>
           </div>
         </div>
